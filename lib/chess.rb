@@ -3,15 +3,23 @@ require 'colorize'
 class ChessGame
     def initialize
         board = Board.new
-        board.display
+        
         
     end
     class Piece
-        attr_accessor :type_of_piece, :init
-        def initialize(type)
-            @type_of_piece = type
-            @init = type[0]
-            puts "init: #{@init}"
+        attr_accessor :type_of_piece, :init, :uni, :color
+        def initialize(
+            type_of_piece:,
+            uni:,
+            color:
+        )
+
+        @type_of_piece = type_of_piece
+        @init = type_of_piece[0]
+        @uni = uni
+        @color = color
+        puts "init: #{@init}"
+        puts "uni:  #{@uni}"
         end
     end
     
@@ -25,27 +33,58 @@ class ChessGame
         def set_board
             
 
-            @br1, @br2, @wr1, @wr2 = [Piece.new('rook')] * 4
-            /bk1, bk2, wk1, wk2 = ['k'] * 4
-            bb1, bb2, wb1, wb2 = ['b'] * 4
+            @br1, @br2= [Piece.new(
+                type_of_piece: 'rook',
+                color: "black",
+                uni: "\u2656"
+                )] * 2
+            @br1, @br2= [Piece.new(
+                type_of_piece: 'rook',
+                color: "white",
+                uni: "\u265C"
+                )] * 2
+
+            
+
+
+
+            /@wr1, @wr2 
+            @br1[:uni] = "\u265C"
+            @br2[:uni] = "\u265C"/
+            /(@wr1, @wr2)[:uni] = "\u2656"
+            bk1, bk2, wk1, wk2 = ['knight'] * 4
+            bb1, bb2, wb1, wb2 = ['bishop'] * 4
             bQq, wQq = ['Q'] * 2
             bKk, wKk = ['K'] * 2
             bp1, bp2, bp3, bp4, bp5, bp6, bp7, bp8, wp1, wp2, wp3, wp4, wp5, wp6, wp7, wp8 = ['p'] * 16/
+tempArray = [
+            [@br1,@br1,0,0,0,0,@br1,0],
+            [0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,@br1,0]
+        ]
             
-            puts "rook?   : #{@br1.init}"
-            /startArray = [
-              [br1,bk1,bb1,bQq,bKk,bb2,bk2,br2],
-              [bp1,bp2,bp3,bp4,bp5,bp6,bp7,bp8],
-              [0,0,0,0,0,0,0,0],
-              [0,0,0,0,0,0,0,0],
-              [0,0,0,0,0,0,0,0],
-              [0,0,0,0,0,0,0,0],
-              [wp1,wp2,wp3,wp4,wp5,wp6,wp7,wp8],
-              [wr1,wk1,wb1,wKk,wQq,wb2,wk2,wr2]
-            ]/
+            
+            
 
-            /@boardArray = startArray
-            simple_print /
+            startArray = [
+              [@br1,@bk1,@bb1,@bQq,@bKk,@bb2,@bk2,@br2],
+              [@bp1,@bp2,@bp3,@bp4,@bp5,@bp6,@bp7,@bp8],
+              [0,0,0,0,0,0,0,0],
+              [0,0,0,0,0,0,0,0],
+              [0,0,0,0,0,0,0,0],
+              [0,0,0,0,0,0,0,0],
+              [@wp1,@wp2,@wp3,@wp4,@wp5,@wp6,@wp7,@wp8],
+              [@wr1,@wk1,@wb1,@wKk,@wQq,@wb2,@wk2,@wr2]
+            ]
+
+            @boardArray = tempArray
+            simple_print
+            display
         end
         def simple_print
             puts "\n\n\n\n\n\n"
@@ -81,12 +120,13 @@ class ChessGame
                 print "            #{counter} "
                 counter -=1
                 8.times do |col| 
+                    
                     if @boardArray[row][col] != 0
                         if toggle == 1
-                            print "  #{@boardArray[row][col]}   ".on_light_blue
+                            print "  #{@boardArray[row][col].uni}   ".on_light_blue
                             toggle = 0
                         else
-                            print "  #{@boardArray[row][col]}   ".on_light_black
+                            print "  #{@boardArray[row][col].uni}   ".on_light_black
                             toggle = 1
                         end
                     else
