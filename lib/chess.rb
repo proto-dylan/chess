@@ -18,8 +18,6 @@ class ChessGame
         @init = type_of_piece[0]
         @uni = uni
         @color = color
-        puts "init: #{@init}"
-        puts "uni:  #{@uni}"
         end
     end
     
@@ -36,13 +34,24 @@ class ChessGame
             @br1, @br2= [Piece.new(
                 type_of_piece: 'rook',
                 color: "black",
-                uni: "\u2656"
+                uni: "\u265C"
                 )] * 2
-            @br1, @br2= [Piece.new(
+            @wr1, @wr2= [Piece.new(
                 type_of_piece: 'rook',
                 color: "white",
                 uni: "\u265C"
                 )] * 2
+            @bk1, @bk2= [Piece.new(
+                type_of_piece: 'knight',
+                color: "black",
+                uni: "\u265E"
+                )] * 2
+            @wk1, @wk2= [Piece.new(
+                type_of_piece: 'knight',
+                color: "white",
+                uni: "\u265E"
+                )] * 2
+            
 
             
 
@@ -58,14 +67,14 @@ class ChessGame
             bKk, wKk = ['K'] * 2
             bp1, bp2, bp3, bp4, bp5, bp6, bp7, bp8, wp1, wp2, wp3, wp4, wp5, wp6, wp7, wp8 = ['p'] * 16/
 tempArray = [
-            [@br1,@br1,0,0,0,0,@br1,0],
+            [@br1,@bk1,0,0,0,0,@wr1,0],
             [0,0,0,0,0,0,0,0],
             [0,0,0,0,0,0,0,0],
             [0,0,0,0,0,0,0,0],
             [0,0,0,0,0,0,0,0],
             [0,0,0,0,0,0,0,0],
             [0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,@br1,0]
+            [0,0,0,0,0,0,@wk1,@wr1]
         ]
             
             
@@ -83,21 +92,35 @@ tempArray = [
             ]
 
             @boardArray = tempArray
+            
+            displaySmall
             simple_print
-            display
         end
         def simple_print
-            puts "\n\n\n\n\n\n"
+            puts "\n\n\n\n"
             counter = 8
-            @boardArray.each do |row| 
+            row = 0
+            col = 0
 
-                puts "        #{counter}|     #{row.join("     ")}"
-                puts "\n\n"
-                
+            8.times do
+                print "                 #{counter}|  "
                 counter -=1
+                8.times do
+                    if @boardArray[row][col] == 0
+                        print "0 "
+                    else
+                        print "#{@boardArray[row][col].init} "
+                    end
+                    col +=1
+
+                end
+                puts "\n"
+                col = 0
+                row +=1
             end
-            puts "               _     _     _     _     _     _     _     _"
-            puts "               a     b     c     d     e     f     g     h"
+
+            puts "                    _ _ _ _ _ _ _ _"
+            puts "                    a b c d e f g h"
             puts "\n\n"
         end
         def display
@@ -122,11 +145,20 @@ tempArray = [
                 8.times do |col| 
                     
                     if @boardArray[row][col] != 0
+                        color_now = "#{@boardArray[row][col].color}"
                         if toggle == 1
-                            print "  #{@boardArray[row][col].uni}   ".on_light_blue
+                            if color_now == "black"
+                                print "  #{@boardArray[row][col].uni}   ".black.on_light_blue
+                            else
+                                print "  #{@boardArray[row][col].uni}   ".white.on_light_blue
+                            end
                             toggle = 0
                         else
-                            print "  #{@boardArray[row][col].uni}   ".on_light_black
+                            if color_now == "black"
+                                print "  #{@boardArray[row][col].uni}   ".black.on_light_black
+                            else 
+                                print "  #{@boardArray[row][col].uni}   ".white.on_light_black
+                            end
                             toggle = 1
                         end
                     else
@@ -158,6 +190,60 @@ tempArray = [
             end
              
             puts "                 A     B     C     D     E     F     G     H"
+            puts "\n\n\n\n\n"
+        end
+        def displaySmall
+            puts "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+            counter = 8
+            toggle = 0
+            toggle2 = 0
+            8.times do |row|
+                puts "\n"
+                print "            #{counter} "
+                counter -=1
+                if toggle2 == 1 
+                    toggle = 1
+                elsif toggle2 == 0
+                    toggle = 0
+                end
+
+                8.times do |col|                     
+                    if @boardArray[row][col] != 0
+                        color_now = "#{@boardArray[row][col].color}"
+                        if toggle == 1
+                            if color_now == "black"
+                                print "#{@boardArray[row][col].uni} ".black.on_light_blue
+                            else
+                                print "#{@boardArray[row][col].uni} ".white.on_light_blue
+                            end
+                            toggle = 0
+                        else
+                            if color_now == "black"
+                                print "#{@boardArray[row][col].uni} ".black.on_light_black
+                            else 
+                                print "#{@boardArray[row][col].uni} ".white.on_light_black
+                            end
+                            toggle = 1
+                        end
+                    else
+                        if toggle == 1
+                            
+                            print "  ".on_light_blue
+                            toggle = 0
+                        else
+                            print "  ".on_light_black
+                            toggle = 1
+                        end
+                    end                   
+                end               
+                if toggle2 == 0
+                    toggle2 = 1
+                else
+                    toggle2 = 0
+                end
+            end  
+            puts "\n"          
+            puts "              a b c d e f g h  "
             puts "\n\n\n\n\n"
         end
     end
