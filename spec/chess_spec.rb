@@ -23,9 +23,22 @@ describe Board do
             expect(array[1][1].location).to eql([1,1]) 
             expect(array[1][1].location).to eql([1,1]) 
             expect(array[6][1].location).to eql([6,1]) 
-
-
         end
     end
+    context "#placePiece" do
+        board = Board.new
+        array=board.setBoard
+        puts "array: #{array[0][0]}"
+
+        it "moves rook " do
+            board.placePiece(array[0][0], [2,2])
+            expect(array[2][2].init).to eql('r')
+        end
+        it "moves knight" do
+            board.placePiece(array[0][1], [3,3])
+            expect(array[3][3].init).to eql('k')
+        end
+    end
+    
 end
                 

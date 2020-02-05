@@ -1,9 +1,6 @@
-require './lib/chess.rb'
-
-   
+require './lib/chess.rb'   
 describe Board do 
-    let(:board) {Board.new}     
-    
+    subject(:board) {Board.new}       
     context '#setBoard' do
         it "creates 8X8 board" do
             expect(board.setBoard.length).to eql(8)            
@@ -26,14 +23,13 @@ describe Board do
         end
         it "assigns moves to pawns" do
             array=board.setBoard
-            expect(array[1][0].moves).to eql([[0,1],[0,2]])
+            expect(array[1][0].moves).to eql([[-1,0],[-2,0]])
         end
     end
     context "#placePiece" do
         board = Board.new
         array=board.setBoard
         puts "array: #{array[0][0]}"
-
         it "moves rook " do
             board.placePiece(array[0][0], [2,2])
             expect(array[2][2].init).to eql('r')
@@ -44,12 +40,115 @@ describe Board do
         end
         it "leaves last place empty" do
             expect(array[0][0]).to eql(0)
-        end 
-    
+        end       
     end
     it "resets the board" do
         array=board.reset
+        #puts "RESET"
         expect(array[0][0].init).to eql('r')    
     end
+    context '#checkMove' do 
+    subject(:board) {Board.new} 
+        it "returns true if valid pawn move" do
+            array=board.setBoard
+            piece = array[1][1]
+            #puts "piece  #{piece}, #{piece.type}, #{piece.init}, #{piece.moves}"
+            val = board.checkMove(piece, [2,1])
+            expect(val).to be true
+        end
+        it "returns false if the pawn move is invalid" do
+            array=board.setBoard
+            piece = array[1][1]
+            #puts "piece  #{piece}, #{piece.type}, #{piece.init}, #{piece.moves}"
+            val = board.checkMove(piece, [2,2])
+            expect(val).to be false
+        end
+        it "returns false if Kinght move is invalid" do
+            array=board.setBoard
+            piece = array[0][1]
+            #puts "piece  #{piece}, #{piece.type}, #{piece.init}, #{piece.moves}"
+            val = board.checkMove(piece, [2,4])
+            expect(val).to be false
+        end
+        it "returns true if Kinght move is invalid" do
+            array=board.setBoard
+            piece = array[0][1]
+            #puts "piece  #{piece}, #{piece.type}, #{piece.init}, #{piece.moves}"
+            val = board.checkMove(piece, [2,2])
+            expect(val).to be true
+        end
+        it "returns true for bishop move" do
+            array=board.setBoard
+            piece = array[0][2]
+            #puts "piece  #{piece}, #{piece.type}, #{piece.init}, #{piece.moves}"
+            val = board.checkMove(piece, [2,4])
+            expect(val).to be true
+        end
+        it "returns false for bishop move" do
+            array=board.setBoard
+            piece = array[0][2]
+            #puts "piece  #{piece}, #{piece.type}, #{piece.init}, #{piece.moves}"
+            val = board.checkMove(piece, [1,4])
+            expect(val).to be false
+        end
+        it "returns true for rook move" do
+            array=board.setBoard
+            piece = array[0][0]
+            #puts "piece  #{piece}, #{piece.type}, #{piece.init}, #{piece.moves}"
+            val = board.checkMove(piece, [0,4])
+            expect(val).to be true
+        end
+        it "returns false for rook move" do
+            array=board.setBoard
+            piece = array[0][0]
+            #puts "piece  #{piece}, #{piece.type}, #{piece.init}, #{piece.moves}"
+            val = board.checkMove(piece, [1,4])
+            expect(val).to be false
+        end
+        it "returns true for queen move" do
+            puts "QHEEEEEENN"
+            array=board.setBoard
+            piece = array[0][3]
+           # puts "piece  #{piece}, #{piece.type}, #{piece.init}, #{piece.moves}"
+            val = board.checkMove(piece, [4,3])
+            expect(val).to be true
+        end
+        it "returns false for queen move" do
+            puts "QHEEEEEENN"
+            array=board.setBoard
+            piece = array[0][3]
+            #puts "piece  #{piece}, #{piece.type}, #{piece.init}, #{piece.moves}"
+            val = board.checkMove(piece, [8,3])
+            expect(val).to be false
+        end
+        it "returns true for queen move" do
+            puts "QHEEEEEENN"
+            array=board.setBoard
+            piece = array[0][3]
+            #puts "piece  #{piece}, #{piece.type}, #{piece.init}, #{piece.moves}"
+            val = board.checkMove(piece, [1,0])
+            expect(val).to be false
+        end
+        it "returns false for king" do
+            array=board.setBoard
+            piece = array[0][4]
+            puts "piece  #{piece}, #{piece.type}, #{piece.init}, #{piece.moves}"
+            val = board.checkMove(piece, [1,4])
+            expect(val).to be true
+        end
+        it "returns true for king" do
+            array=board.setBoard
+            piece = array[0][4]
+            puts "piece  #{piece}, #{piece.type}, #{piece.init}, #{piece.moves}"
+            val = board.checkMove(piece, [1,0])
+            expect(val).to be false
+
+        end
+
+
+
+7
+1   end
 end
+
                 
