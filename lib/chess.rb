@@ -1,18 +1,19 @@
 require 'colorize'
 
 class Game
-    attr_accessor :board_array
+    attr_accessor :board_array, :win, :player
     def initialize
-    
         @board = Board.new
-        #play
+        @win = false
+        @player = 'black'
+        play
     end
     def play
         #welcome
-        win = false
-        until win do
-            #player = "Black"
-            @board.takeTurn
+        @win = false
+        until @win do
+            
+            @board.takeTurn(@player)
             
         end
 
@@ -210,8 +211,7 @@ class Board
                     child = Node.new(current, parent_node)
                     parent_node.children.push(child)
                     root_node.push(child)
-                    puts "pos : #{parent_node.position}  des:  #{destination}"
-                    
+                    puts "pos : #{parent_node.position}  des:  #{destination}"                 
                     if parent_node.position == destination
                         puts " INSide buildpath : 3"
                         while not parent_node.nil?
@@ -226,8 +226,7 @@ class Board
         end    
     end  
 
-    def is_valid_move?(move, row, col)
-        
+    def is_valid_move?(move, row, col)        
          return ((move[0]+col) > -1) && ((move[0]+col) < 8) && ((move[1]+row) > -1) && ((move[1]+row) < 8) ? true : false
     end
     def takeTurn(player='black', valid=true)
@@ -241,19 +240,30 @@ class Board
         piece_coords = convertCoords(move_coords[0])
         piece = @board_array[piece_coords[0]][piece_coords[1]]     
         move = convertCoords(move_coords[1])
-        possibles = buildPossibles(piece)
+        #possibles = buildPossibles(piece)
         if checkMove(piece, move)
             to_move = true
             path = buildPathTree(piece, move)
+            puts "path: #{path}"
             path.each do |loc|
-                temp_row = loc[0]
-                temp_col = loc[1]
-                if @board_array[loc[0]][loc[1]] != 0
-                    to_move = false
+                puts "check path #{loc}"
+                if loc != piece_coords
+                    temp_row = loc[0]
+                    temp_col = loc[1]
+                    if @board_array[loc[0]][loc[1]] != 0
+                        to_move = false
+                    end
                 end
             end
             if to_move == true
+                puts "PLACE!"
                 placePiece(piece, move)
+
+                if @player == 'black'
+                    @player = 'white'
+                else
+                    @player = 'black'
+                end
             else
                 valid = false
                 takeTurn(player, valid)
