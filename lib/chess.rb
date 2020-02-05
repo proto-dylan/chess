@@ -4,20 +4,30 @@ class Game
     attr_accessor :board_array
     def initialize
     
-        board = Board.new
-        
+        @board = Board.new
+        #play
     end
-    
+    def play
+        #welcome
+        win = false
+        until win do
+            #player = "Black"
+            @board.takeTurn
+            
+        end
+
+    end
 end
 
 class Piece
-    attr_accessor :type, :init, :uni, :color, :moves, :location
+    attr_accessor :type, :init, :uni, :color, :moves, :location, :moved
     def initialize(
         type:,
         uni:,
         color:,
         moves: [],
-        location: []
+        location: [],
+        moved: false
     )
     @type = type
     @init = type[0]
@@ -26,6 +36,39 @@ class Piece
     @moves = moves
     @location = location
     end
+    
+    
+
+    /def build_node_tree(piece, move)
+        moves = piece.moves
+        position = piece.location
+        root =  Node.new(position) 
+        root_node = [root]
+        col = position[0]
+        row = position[1]
+        
+        while not root_node.empty? && path.empty?
+            parent_node = root_node.shift
+            moves.each do |move|
+                if is_valid_move?(move, col, row)
+                    current = [parent_node.position[0]+move[0], parent_node.position[1]+move[1]]
+                    child = Node.new(current, parent_node)
+                    parent_node.children.push(child)
+                    root_node.push(child)
+                    if parent_node.position == move
+                        while not parent_node.nil?
+                            path.push(parent_node.position)
+                            parent_node = parent_node.parent
+                        end
+                    end 
+                end
+            end 
+        end 
+    end/  
+end
+
+class Board
+
     class Node        
         attr_accessor :position, :parent, :children
             def initialize (position, parent = nil, children = [])
@@ -34,36 +77,10 @@ class Piece
                 @children = []
             end  
     end
-    /def make_node(piece, position, destination)
-        root =  Node.new(position) 
-        root_node = [root]
-        col = position[0]
-        row = position[1]
-        
-        while not root_node.empty? && path.empty?
-            parent_node = root_node.shift
-            piece.moves.each do |move|
-                if is_valid_move?(move, col, row)
-                    current = [parent_node.position[0]+move[0], parent_node.position[1]+move[1]]
-                    child = Node.new(current, parent_node)
-                    parent_node.children.push(child)
-                    root_node.push(child)
-                    if parent_node.position == destination
-                        while not parent_node.nil?
-                            path.push(parent_node.position)
-                            parent_node = parent_node.parent
-                        end
-                    end
-                end
-            end 
-        end 
-    end/  
-end
 
-class Board
     attr_accessor :board_array
-    @@white_pawn_moves = [[1,0],[2,0]]
-    @@black_pawn_moves = [[-1,0],[-2,0]]
+    @@white_pawn_moves = [[-1,0],[-2,0]]
+    @@black_pawn_moves = [[1,0],[2,0]]
     @@knight_moves = [[-1,2],[1,2],[2,1],[2,-1],[1,-2],[-1,-2],[-2,-1],[-2,1]]  
 
     @@bishop_moves = [[1,1],[2,2],[3,3],[4,4],[5,5],[6,6],[7,7],[-1,1],[-2,2],
@@ -171,16 +188,114 @@ class Board
         end
         return @board_array
     end
-  #def is_valid_move?(move, row, col)
-   #     puts "INSIDE move?: #{move}, row: #{row}, col: #{col}"
-    #    return ((move[0]+col) > -1) && ((move[0]+col) < 8) && ((move[1]+row) > -1) && ((move[1]+row) < 8) ? true : false
-    #end
+
+    def buildPathTree(piece, move)
+        puts "PIECE : #{piece},  type. #{piece.type}"
+        destination = move
+        moves = piece.moves
+        position = piece.location
+        root =  Node.new(position) 
+        root_node = [root]
+        col = position[0]
+        row = position[1]
+        path = []
+        while not root_node.empty? && path.empty?
+            puts " INSide buildpath : 1"
+            parent_node = root_node.shift
+            puts "moves: #{moves}"
+            moves.each do |move|
+                if is_valid_move?(move, col, row)
+                    puts " INSide buildpath : 2"
+                    current = [parent_node.position[0]+move[0], parent_node.position[1]+move[1]]
+                    child = Node.new(current, parent_node)
+                    parent_node.children.push(child)
+                    root_node.push(child)
+                    puts "pos : #{parent_node.position}  des:  #{destination}"
+                    
+                    if parent_node.position == destination
+                        puts " INSide buildpath : 3"
+                        while not parent_node.nil?
+                            path.push(parent_node.position)
+                            parent_node = parent_node.parent
+                        end
+                        puts "path: #{path.reverse}"
+                        return path.reverse
+                    end
+                end
+            end 
+        end    
+    end  
+
+    def is_valid_move?(move, row, col)
+        
+         return ((move[0]+col) > -1) && ((move[0]+col) < 8) && ((move[1]+row) > -1) && ((move[1]+row) < 8) ? true : false
+    end
+    def takeTurn(player='black', valid=true)
+        refresh
+        piece = []
+        move = []
+        if valid == false
+            puts "Invalid move"
+        end
+        move_coords = getMove(player)
+        piece_coords = convertCoords(move_coords[0])
+        piece = @board_array[piece_coords[0]][piece_coords[1]]     
+        move = convertCoords(move_coords[1])
+        possibles = buildPossibles(piece)
+        if checkMove(piece, move)
+            to_move = true
+            path = buildPathTree(piece, move)
+            path.each do |loc|
+                temp_row = loc[0]
+                temp_col = loc[1]
+                if @board_array[loc[0]][loc[1]] != 0
+                    to_move = false
+                end
+            end
+            if to_move == true
+                placePiece(piece, move)
+            else
+                valid = false
+                takeTurn(player, valid)
+            end
+        else
+            valid = false
+            takeTurn(player, valid)
+        end
+    end
+    def convertCoords(coords)
+        coord_array = coords.split(',').map(&:to_i)
+        return coord_array
+    end
+
+    def getMove(player)
+        puts "#{player} turn"
+        puts "Piece to move ('row,col'): "
+        piece = gets.chomp
+        puts "To ('row,col'): "
+        move = gets.chomp
+        return piece, move
+    end
+   # /def buildPossibles(piece)
+    #possibles = []
+    #moves = piece.moves
+    #current_row = piece.location[0]
+    #current_col = piece.location[1] 
+   # moves.each do |move|
+    #    temp_row = (current_row - move[0])
+    #    temp_col = (current_col - move[1])
+    #    if (temp_row > -1) && (temp_row < 8) && (temp_col > -1) && (temp_col < 8)
+    #        possibles << [temp_row, temp_col]
+    #    end
+   # end
+    #return possibles
+    #end/
+
     def checkMove(piece, move)
-            row = piece.location[0]-move[0]
-            col = piece.location[1]-move[1]
-            puts "move: #{move},  piece: #{piece.location}"
+            
+            row = move[0]-piece.location[0]
+            col = move[1]-piece.location[1]
             travel = [row,col]
-            puts "TRAVEL: #{travel}"
             return piece.moves.include?(travel) ? true : false
     end
     def placePiece(piece, loc)
@@ -192,7 +307,7 @@ class Board
         temp_col = current[1]
         @board_array[temp_row][temp_col] = 0
         @board_array[row][col] = piece
-        #refresh
+        refresh
     end
     def simplePrint       
         puts "\n\n"
@@ -279,5 +394,5 @@ class Board
 end
 
 
-#game = Game.new
+game = Game.new
    

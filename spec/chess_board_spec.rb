@@ -23,7 +23,7 @@ describe Board do
         end
         it "assigns moves to pawns" do
             array=board.setBoard
-            expect(array[1][0].moves).to eql([[-1,0],[-2,0]])
+            expect(array[6][0].moves).to eql([[-1,0],[-2,0]])
         end
     end
     context "#placePiece" do
@@ -52,7 +52,7 @@ describe Board do
         it "returns true if valid pawn move" do
             array=board.setBoard
             piece = array[1][1]
-            #puts "piece  #{piece}, #{piece.type}, #{piece.init}, #{piece.moves}"
+            puts "piece  #{piece}, #{piece.type}, #{piece.init}, #{piece.moves}"
             val = board.checkMove(piece, [2,1])
             expect(val).to be true
         end
@@ -70,7 +70,7 @@ describe Board do
             val = board.checkMove(piece, [2,4])
             expect(val).to be false
         end
-        it "returns true if Kinght move is invalid" do
+        it "returns true if Kinght move is valid" do
             array=board.setBoard
             piece = array[0][1]
             #puts "piece  #{piece}, #{piece.type}, #{piece.init}, #{piece.moves}"
@@ -144,11 +144,27 @@ describe Board do
             expect(val).to be false
 
         end
+    end 
+    context "#buildPathTree" do
+    subject(:board) {Board.new} 
+        it "returns an array do" do
+            array=board.setBoard
 
+            piece = array[6][1]
 
+            move = [4,1]
+            #piece = double('piece')
+           # move = double('move')
 
-7
-1   end
+            #allow(piece).to receive(:piece) { array[1][1] }
+            #allow(move).to receive(:move) { [1,3] }
+            
+            path = board.buildPathTree(piece, move)
+            expect(path).to be_instance_of(Array)
+
+        end
+    end
 end
+
 
                 
