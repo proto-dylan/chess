@@ -44,7 +44,7 @@ describe Board do
     end
     it "resets the board" do
         array=board.reset
-        #puts "RESET"
+   
         expect(array[0][0].init).to eql('r')    
     end
     context '#checkMove' do 
