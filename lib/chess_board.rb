@@ -21,7 +21,10 @@ class Board
     [3,-3],[4,-4],[5,-5],[6,-6],[7,-7],[-1,-1],[-2,-2],[-3,-3],[-4,-4],[-5,-5],[-6,-6],[-7,-7]]
 
     @@king_moves = [[1,0],[1,1],[0,1],[1,-1],[0,-1],[-1,-1],[-1,0],[-1,1]]    
-   
+    
+    @@inputKeys = {'a' => 0,'b' => 1,'c' => 2,'d' => 3,'e' => 4,'f' => 5,'g' => 6,'h' => 7,1 => 7,2 => 6,3 => 5,4 => 4,5 => 3,
+        6 => 2,7 => 1,8 => 0}
+        
     def initialize 
         makePieces
         setBoard
@@ -163,17 +166,22 @@ class Board
         if valid == false
             puts "Invalid move"
         end
-        move_coords = getMove(player)
-        piece_coords = convertCoords(move_coords[0])
+        input_coords = getMove(player)
+        
+        piece_coords = convertCoords(input_coords[0])
+        move_coords = convertCoords(input_coords[1])
+
+        puts "piece_coords #{piece_coords}"
+        puts "move coords: #{move_coords}"
+
         piece = @board_array[piece_coords[0]][piece_coords[1]]     
-        move = convertCoords(move_coords[1])
+        move = move_coords
             
         if piece.is_a?(Piece)
             if piece.color != player
                 puts "Wrong color, #{player} turn"
                 takeTurn(player)
             end
-            #possibles = buildPossibles(piece)
             if checkMove(piece, move)
                 to_move = true
                 path = buildPathTree(piece, move)
@@ -199,20 +207,39 @@ class Board
                 valid = false
                 takeTurn(@player, valid)
             end
+        else
+            puts "No piece, choose again"
+            takeTurn(player)
         end
     end
 
     def convertCoords(coords)
-        coord_array = coords.split(',').map(&:to_i)
-        return coord_array
+        array = coords.split(//)
+        temp = []
+        puts "temp in convert coords #{array}"
+        temp[0] = @@inputKeys[array[0]]
+        temp[1] = @@inputKeys[array[1].to_i]
+        array = temp.reverse
+        puts "array: #{array}"
+        #coord_array = coords.split(',').map(&:to_i)
+
+        return array
     end
 
     def getMove(player)
         puts "#{player} turn"
-        puts "Piece to move ('row,col'): "
-        piece = gets.chomp
-        puts "To ('row,col'): "
-        move = gets.chomp
+        puts "Enter move: "
+        input = gets.chomp
+       
+        if input.match(/[a-h][1-8][\s](\w*to\w*)[\s][a-h][1-8]/)
+            input = input.split('to')
+            piece = input[0].rstrip
+            move = input[1].strip
+            puts "piece in match: #{piece}   move: #{move}"
+        else
+            puts "invalid move"
+            takeTurn(player)
+        end
         return piece, move
     end
    # /def buildPossibles(piece)

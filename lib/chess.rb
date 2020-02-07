@@ -8,6 +8,7 @@ class Game
         @board = Board.new
         @win = false
         @player = "black"
+        
         play
     end
     def play
