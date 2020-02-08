@@ -155,21 +155,14 @@ class Game
         5.times do
             puts "\n"
             sleep(0.08)
-        end
-        
+        end     
         sleep(4)
         30.times do
             puts "\n"
             sleep(0.08)
-        end
-    
+        end    
     end
-    
-
-
-
-
-
+end
 
 
 

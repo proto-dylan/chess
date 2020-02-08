@@ -119,7 +119,7 @@ class Board
         end
         return @board_array
     end
-    def buildPath
+    
 
     def buildTree
         puts "PIECE : #{piece},  type. #{piece.type}"
