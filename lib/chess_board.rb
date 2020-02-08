@@ -120,7 +120,7 @@ class Board
         return @board_array
     end
 
-    def buildPathTree
+    def buildTree
         puts "PIECE : #{piece},  type. #{piece.type}"
         destination = @move
         moves = piece.moves
@@ -130,20 +130,15 @@ class Board
         col = position[0]
         row = position[1]
         path = []
-        while not root_node.empty? && path.empty?
-            puts " INSide buildpath : 1"
+        while not root_node.empty? && path.empty?         
             parent_node = root_node.shift
-            puts "moves: #{moves}"
             moves.each do |move|
-                if is_valid_move?(move, col, row)
-                    puts " INSide buildpath : 2"
+                if is_valid_move?(move, col, row)                  
                     current = [parent_node.position[0]+move[0], parent_node.position[1]+move[1]]
                     child = Node.new(current, parent_node)
                     parent_node.children.push(child)
-                    root_node.push(child)
-                    puts "pos : #{parent_node.position}  des:  #{destination}"                 
-                    if parent_node.position == destination
-                        puts " INSide buildpath : 3"
+                    root_node.push(child)                 
+                    if parent_node.position == destination                       
                         while not parent_node.nil?
                             path.push(parent_node.position)
                             parent_node = parent_node.parent
@@ -154,7 +149,36 @@ class Board
                 end
             end 
         end    
-    end  
+    end 
+    
+    def buildPath(piece, move, travel)
+        puts "BUILD! piece = #{piece.location}"
+        path = []
+        temp_piece = piece
+        loc = piece.location
+        destination = move
+        
+        puts "Loc: #{loc}  destination: #{destination} travel: #{travel}"
+    
+        if travel[1] == 0 && travel[0] > 0
+            puts "insides, ttravel[0]: #{travel[0]}"
+            travel[0].times do
+                loc[0] += 1
+                puts "loc check #{loc}"
+                if @board_array[loc[0]][loc[1]] == 0
+                    temp = [loc[0],loc[1]]
+                    
+                    path << temp
+                else 
+                    path = nil
+                    return path
+                end
+            end
+            piece = temp_piece
+            puts "piece back?  #{@piece.location}"
+            return path
+        end
+    end
 
     def is_valid_move?(move, row, col)        
          return ((move[0]+col) > -1) && ((move[0]+col) < 8) && ((move[1]+row) > -1) && ((move[1]+row) < 8) ? true : false
@@ -174,9 +198,9 @@ class Board
         return array
     end
 
-    def getMove
-        puts "#{@player} turn"
-        puts "Enter @move: "
+    def getMove(player)
+        puts "#{player} turn"
+        puts "Enter move: "
         input = gets.chomp
        
         if input.match(/[a-h][1-8][\s](\w*to\w*)[\s][a-h][1-8]/)
@@ -214,15 +238,16 @@ class Board
         return piece.moves.include?(travel) ? true : false
     end
 
-    def placePiece
-        current = @piece.location
-        @piece.location = @move        
-        row = @move[0]
-        col = @move[1]
+    def placePiece(piece, move)
+        puts "inside PLACE: piece: #{piece}, #{piece.type}, move: #{move}"
+        current = piece.location
+        piece.location = move        
+        row = move[0]
+        col = move[1]
         temp_row = current[0]
         temp_col = current[1]
         @board_array[temp_row][temp_col] = 0
-        @board_array[row][col] = @piece
+        @board_array[row][col] = piece
     end
 
     def simplePrint       
@@ -253,8 +278,7 @@ class Board
     def refresh
         puts "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
         simplePrint
-        display
-        
+        display        
     end 
     
     def display
