@@ -28,8 +28,6 @@ class Game
             end
         end
     end
-<<<<<<< HEAD
-=======
 
     def takeTurn(player, valid=true)
         @board.refresh
@@ -90,7 +88,6 @@ class Game
             takeTurn(@player)
         end
     end
->>>>>>> refactor
     def welcome
        
         puts "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
@@ -165,9 +162,6 @@ class Game
             puts "\n"
             sleep(0.08)
         end
-<<<<<<< HEAD
-    end
-=======
     
     end
     
@@ -175,8 +169,7 @@ class Game
 
 
 
->>>>>>> refactor
-end
+
 
 
 
