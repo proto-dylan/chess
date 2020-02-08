@@ -123,48 +123,9 @@ class Board
 
         
     end
-    def buildTree(piece, move)
-        #puts "PIECE : #{piece},  type. #{piece.type}"
-        destination = move
-        moves = piece.moves
-        position = piece.location
-        root =  Node.new(position) 
-        root_node = [root]
-        col = position[0]
-        row = position[1]
-        path = []
-        while not root_node.empty? && path.empty?
-           # puts " INSide buildpath : 1"
-            parent_node = root_node.shift
-            #puts "moves: #{moves}"
-            moves.each do |move|
-                #puts "inside move: #{move}, row: #{row}, col: #{col}"
-                if is_valid_move?(move, col, row)
-                    #puts " INSide buildpath : 2"
-                    current = [parent_node.position[0]+move[0], parent_node.position[1]+move[1]]
-                    child = Node.new(current, parent_node)
-                    parent_node.children.push(child)
-                    root_node.push(child)
-                    puts "pos : #{parent_node.position}  des:  #{destination}"                 
-                    #if parent_node.position == destination
-                       # puts " INSide buildpath : 3"
-                        while not parent_node.nil?
-                            path.push(parent_node.position)
-                            parent_node = parent_node.parent
-                            puts "push<<"
-                        end
-                       # puts "path: #{path.reverse}"
-                        return path.reverse
-                    #end
-                end
-            end 
-        end    
-    end  
-
-    def is_valid_move?(move, row, col)     
-        #puts "valid? move0+col: #{move[0]+col}, move1+row: #{move[1]+row}"   
-         return ((move[1]+col) > -1) && ((move[1]+col) < 8) && ((move[0]+row) > -1) && ((move[0]+row) < 8) ? true : false
-    end
+   
+                         #takes valid arg to denote a retry of a turn
+   
     def takeTurn(player, valid=true)
         refresh
         piece = []
@@ -172,45 +133,41 @@ class Board
         if valid == false
             puts "Invalid move"
         end
-        input_coords = getMove(player)
+        input_coords = getMove(@player)
         
         piece_coords = convertCoords(input_coords[0])
         move_coords = convertCoords(input_coords[1])
-
-        #puts "piece_coords #{piece_coords}"
-        puts "move coords: #{move_coords}"
 
         piece = @board_array[piece_coords[0]][piece_coords[1]]     
         move = move_coords
             
         if piece.is_a?(Piece)
-            if piece.color != player
-                puts "Wrong color, #{player} turn"
-                takeTurn(player)
+            if piece.color != @player
+                puts "Wrong color, #{@player} turn"
+                takeTurn(@player)
             end
-            if checkMove(piece, move)
+            puts "Piece loc check 1: #{piece.location}"
+            check =  checkMove(piece, move)
+            puts "Piece loc check 2: #{piece.location}"
+            if check[0] == true
                 to_move = true
-                path = buildPathTree(piece, move)
-                puts "path: #{path}"
-                path.each do |loc|
-                    puts "check path #{loc}"
-                    if loc != piece_coords
-                        temp_row = loc[0]
-                        temp_col = loc[1]
-                        puts "check path, current space? :#{@board_array[loc[0]][loc[1]]}"
-                        if @board_array[loc[0]][loc[1]] != 0
-                            puts "BLOCK"
-                            to_move = false
-                            break
-                        end
+                travel = check[1]
+                puts "Travel : #{travel}"
+                puts "Piece loc check 3: #{piece.location}"
+                path = buildPath(piece, move, travel)
+                puts "Piece loc check 4: #{@piece.location}"
+                puts "path CHECK #{path}"
+                if path != nil
+                    if to_move == true
+                        puts "PLACE! loc: #{@piece.location},   move: #{move}"
+                        placePiece(@piece, move)
+                    else
+                        valid = false
+                        takeTurn(@layer, valid)
                     end
-                end
-                if to_move == true
-                    puts "PLACE!"
-                    placePiece(piece, move)
                 else
-                    valid = false
-                    takeTurn(@player, valid)
+                    puts "Move blocked by another piece"
+                    takeTurn(@player)
                 end
             else
                 valid = false
@@ -218,7 +175,7 @@ class Board
             end
         else
             puts "No piece, choose again"
-            takeTurn(player)
+            takeTurn(@player)
         end
     end
 
@@ -236,7 +193,7 @@ class Board
     end
 
     def getMove(player)
-        puts "#{player} turn"
+        puts "#{@player} turn"
         puts "Enter move: "
         input = gets.chomp
        
@@ -247,11 +204,40 @@ class Board
             puts "piece in match: #{piece}   move: #{move}"
         else
             puts "invalid move"
-            takeTurn(player)
+            takeTurn(@player)
         end
         return piece, move
     end
-    /def buildPossibles(piece, move)
+    def buildPath(piece, move, travel)
+        puts "BUILD! piece = #{piece.location}"
+        path = []
+        temp_piece = piece
+        loc = piece.location
+        destination = move
+        
+        puts "Loc: #{loc}  destination: #{destination} travel: #{travel}"
+
+        if travel[1] == 0 && travel[0] > 0
+            puts "insides, ttravel[0]: #{travel[0]}"
+            travel[0].times do
+                loc[0] += 1
+                puts "loc check #{loc}"
+                if @board_array[loc[0]][loc[1]] == 0
+                    temp = [loc[0],loc[1]]
+                    
+                    path << temp
+                else 
+                    path = nil
+                    return path
+                end
+            end
+            piece = temp_piece
+            puts "piece back?  #{@piece.location}"
+            return path
+        end
+    end
+        
+    def buildPossibles(piece, move)
         possibles = []
         moves = piece.moves
         to_move = move
@@ -264,25 +250,32 @@ class Board
             end
         end
         return possibles
-    end/
-
+    end
+    
     def checkMove(piece, move)
-            
-            row = move[0]-piece.location[0]
-            col = move[1]-piece.location[1]
-            travel = [row,col]
-            return piece.moves.include?(travel) ? true : false
+        if is_valid_move?(piece, move)
+            travel = [(move[0]-piece.location[0]),(move[1]-piece.location[1])]
+            if piece.moves.include?(travel)
+                return true, travel
+            else
+                return false
+            end    
+        end
+    end
+    def is_valid_move?(piece, move)     
+        loc = piece.location
+         return ((move[1]+loc[1]) > -1) && ((move[1]+loc[1]) < 8) && ((move[0]+loc[0]) > -1) && ((move[0]+loc[0]) < 8) ? true : false
     end
 
-    def placePiece(piece, loc)
+    def placePiece(piece, move)
+    
         current = piece.location
-        piece.location = loc        
-        row = loc[0]
-        col = loc[1]
-        temp_row = current[0]
-        temp_col = current[1]
-        @board_array[temp_row][temp_col] = 0
-        @board_array[row][col] = piece
+        destination = move
+                
+        puts "Current: #{current}  dest: #{destination}"
+        @board_array[destination[0]][destination[1]] = piece
+        @board_array[current[0]][current[1]] = 0
+
         refresh
     end
 
