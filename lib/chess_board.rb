@@ -152,33 +152,34 @@ class Board
         end    
     end 
     
-    def buildPath(piece, move, travel)
-        puts "BUILD! piece = #{piece.location}"
+    def buildPath(location, destination, travel)
+        puts "BUILD! piece loc = #{location}"
         path = []
-        temp_piece = piece
-        loc = piece.location
-        destination = move
+      
         
-        puts "Loc: #{loc}  destination: #{destination} travel: #{travel}"
+        puts "Loc: #{location}  destination: #{destination} travel: #{travel}"
     
         if travel[1] == 0 && travel[0] > 0
-            puts "insides, ttravel[0]: #{travel[0]}"
-            travel[0].times do
-                loc[0] += 1
-                puts "loc check #{loc}"
-                if @board_array[loc[0]][loc[1]] == 0
-                    temp = [loc[0],loc[1]]
-                    
-                    path << temp
-                else 
-                    path = nil
-                    return path
-                end
-            end
-            piece = temp_piece
-            puts "piece back?  #{@piece.location}"
-            return path
+            travel_temp = travel[0]
+            counter = 1
+        elsif travel[1] == 0 && travel[0] < 0
+            travel_temp = (travel[0]*(-1))
+            counter = -1
         end
+        travel_temp.times do
+            location[0] += counter
+            puts "loc check #{location}"
+            if @board_array[location[0]][location[1]] == 0
+                temp = [location[0],location[1]]
+                path << temp
+            else 
+                path = nil
+                return path
+            end
+        end
+        return path
+
+
     end
 
     def is_valid_move?(move, row, col)        
@@ -188,27 +189,22 @@ class Board
 
     def convertCoords(coords)
         array = coords.split(//)
-        temp = []
-        puts "temp in convert coords #{array}"
+        temp = [] 
         temp[0] = @@inputKeys[array[0]]
         temp[1] = @@inputKeys[array[1].to_i]
         array = temp.reverse
-        puts "array: #{array}"
-        #coord_array = coords.split(',').map(&:to_i)
-
         return array
     end
 
     def getMove(player)
-        puts "#{@player} turn"
-        puts "Enter move: "
+
+        puts "#{player} move: "
         input = gets.chomp
        
         if input.match(/[a-h][1-8][\s](\w*to\w*)[\s][a-h][1-8]/)
             input = input.split('to')
             @piece = input[0].rstrip
             @move = input[1].strip
-            puts "piece in match: #{@piece}   @move: #{@move}"
         else
             puts "invalid @move"
             takeTurn(@player)
@@ -229,26 +225,32 @@ class Board
    # end
     #return possibles
     #end/
+    
 
-    def checkMove(move,piece) 
+
+    def getTravel(move, piece) 
         loc = piece.location
-        puts "In check move: move = #{move} location = #{loc}, piece? #{piece.type}"
         row = move[0]-loc[0]
         col = move[1]-loc[1]
         travel = [row,col]
+        return travel
+    end
+
+    def checkMove(travel, piece)
         return piece.moves.include?(travel) ? true : false
     end
 
     def placePiece(piece, move)
-        puts "inside PLACE: piece: #{piece}, #{piece.type}, move: #{move}"
+        puts "inside PLACE: piece: #{piece}, #{piece.type},loc: #{piece.location} move: #{move}"
         current = piece.location
         piece.location = move        
         row = move[0]
         col = move[1]
-        temp_row = current[0]
-        temp_col = current[1]
-        @board_array[temp_row][temp_col] = 0
+        puts "current #{current}"
+        @board_array[current[0]][current[1]] = 0
+        puts "zero? #{@board_array[current[0]][current[1]]}"
         @board_array[row][col] = piece
+        refresh
     end
 
     def simplePrint       
