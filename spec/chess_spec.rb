@@ -1,6 +1,6 @@
-require_relative './lib/chess.rb'   
-require_relative './lib/chess_board.rb'
-require_relative './lib/chess_piece.rb'
+require 'spec_helper'
+require './lib'
+
 
 describe Board do 
     subject(:board) {Board.new}       
