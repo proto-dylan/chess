@@ -1,6 +1,6 @@
 require 'colorize'
-require './chess_piece.rb'
-require './chess_board.rb'
+require_relative 'chess_piece.rb'
+require_relative 'chess_board.rb'
 
 class Game
     attr_accessor :board_array, :win, :player
@@ -34,7 +34,7 @@ class Game
         @piece = []
         @move = []
 
-        puts "player in take turn? #{player}"
+        
         if valid == false
             puts "Invalid @move"
         end
@@ -58,20 +58,20 @@ class Game
                 takeTurn(@player)
             end
             puts "outside check: move = #{@move} location = #{@piece.location}"
-            if @board.checkMove(@move,@piece)
+            travel = @board.getTravel(@move, @piece)
+            puts "travel: #{travel}"
+            puts "piece loc #{@piece.location}"
+            if @board.checkMove(travel, @piece)
                 to_move = true
-                #path = @board.buildPathTree
-                #puts "path: #{path}"
-                #path.each do |path_move|
-                #    puts "check path #{path_move}"
-                #    if path_move != piece_coords
-                #        temp_row = path_move[0]
-                #        temp_col = path_move[1]
-                #        if @board.board_array[path_move[0]][path_move[1]] != 0
-                #            to_move = false
-                #        end
-                #    end
-                #end
+                path = @board.buildPath(piece_coords, @move, travel)
+                #@piece.location = piece_coords                    #I dont know why the location is being changed, but a reset is needed here
+                puts "Path: #{path}"
+                if path.nil?
+                    puts "Invalid move, go again"
+                    takeTurn(@player)
+                else
+                    to_move = @board.checkPath(path, piece_coords)
+                end
                 if to_move == true
                     puts "PLACE!"
                     @board.placePiece(@piece, @move)

@@ -1,12 +1,13 @@
 
 class Piece
-    attr_accessor :type, :init, :uni, :color, :moves, :location, :moved
+    attr_accessor :type, :init, :uni, :color, :moves, :location, :moved, :travel
     def initialize(
         type:,
         uni:,
         color:,
         moves: [],
         location: [],
+        travel: [],
         moved: false
     )
     @type = type
