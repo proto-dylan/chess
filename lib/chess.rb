@@ -66,15 +66,11 @@ class Game
                 path = @board.buildPath(piece_coords, @move, travel)
                 #@piece.location = piece_coords                    #I dont know why the location is being changed, but a reset is needed here
                 puts "Path: #{path}"
-                path.each do |path_move|
-                    puts "check path #{path_move}"
-                    if path_move != piece_coords
-                        temp_row = path_move[0]
-                        temp_col = path_move[1]
-                        if @board.board_array[path_move[0]][path_move[1]] != 0
-                            to_move = false
-                        end
-                    end
+                if path.nil?
+                    puts "Invalid move, go again"
+                    takeTurn(@player)
+                else
+                    to_move = @board.checkPath(path, piece_coords)
                 end
                 if to_move == true
                     puts "PLACE!"

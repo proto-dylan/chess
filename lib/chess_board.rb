@@ -3,26 +3,21 @@ class Board
 
     @@white_pawn_moves = [[-1,0],[-2,0]]
     @@black_pawn_moves = [[1,0],[2,0]]
-
     @@knight_moves = [[-1,2],[1,2],[2,1],[2,-1],[1,-2],[-1,-2],[-2,-1],[-2,1]]  
-
     @@bishop_moves = [[1,1],[2,2],[3,3],[4,4],[5,5],[6,6],[7,7],[-1,1],[-2,2],
     [-3,3],[-4,4],[-5,5],[-6,6],[-7,7],[1,-1],[2,-2],[3,-3],[4,-4],[5,-5],
     [6,-6],[7,-7],[-1,-1],[-2,-2],[-3,-3],[-4,-4],[-5,-5],[-6,-6],[-7,-7]]
-
     @@rook_moves = [[0,1],[0,2],[0,3],[0,4],[0,5],[0,6],[0,7],[0,-1],[0,-2],
     [0,-3],[0,-4],[0,-5],[0,-6],[0,-7],[1,0],[2,0],[3,0],[4,0],[5,0],[6,0],[7,0],
     [-1,0],[-2,0],[-3,0],[-4,0],[-5,0],[-6,0],[-7,0]]
-
     @@queen_moves = [[0,1],[0,2],[0,3],[0,4],[0,5],[0,6],[0,7],[0,-1],[0,-2],
     [0,-3],[0,-4],[0,-5],[0,-6],[0,-7],[1,0],[2,0],[3,0],[4,0],[5,0],[6,0],[7,0],
     [-1,0],[-2,0],[-3,0],[-4,0],[-5,0],[-6,0],[-7,0],[1,1],[2,2],[3,3],[4,4],[5,5],
     [6,6],[7,7],[-1,1],[-2,2],[-3,3],[-4,4],[-5,5],[-6,6],[-7,7],[1,-1],[2,-2],
     [3,-3],[4,-4],[5,-5],[6,-6],[7,-7],[-1,-1],[-2,-2],[-3,-3],[-4,-4],[-5,-5],[-6,-6],[-7,-7]]
-
     @@king_moves = [[1,0],[1,1],[0,1],[1,-1],[0,-1],[-1,-1],[-1,0],[-1,1]]    
     
-    @@inputKeys = {'a' => 0,'b' => 1,'c' => 2,'d' => 3,'e' => 4,'f' => 5,'g' => 6,'h' => 7,1 => 7,2 => 6,3 => 5,4 => 4,5 => 3,
+    @@input_keys = {'a' => 0,'b' => 1,'c' => 2,'d' => 3,'e' => 4,'f' => 5,'g' => 6,'h' => 7,1 => 7,2 => 6,3 => 5,4 => 4,5 => 3,
         6 => 2,7 => 1,8 => 0}
         
     def initialize 
@@ -51,6 +46,7 @@ class Board
         )
         return piece
     end
+
     def makePieces         
                                              #make black team pieces
         @br1 = makePiece("rook", "black", "\u265C", @@rook_moves)
@@ -87,10 +83,12 @@ class Board
         @wQq = makePiece("queen", "white", "\u265B", @@queen_moves)
         @wKk = makePiece("king", "white", "\u265A", @@king_moves)   
     end
+
     def reset
         board = Board.new
         return @board_array
     end
+
     def setBoard      
         @board_array = [
             [@br1,@bk1,@bb1,@bQq,@bKk,@bb2,@bk2,@br2],
@@ -104,6 +102,7 @@ class Board
         ]   
         return @board_array
     end
+
     def assignStartingLocations
         col=0
         row=0
@@ -122,7 +121,6 @@ class Board
     
 
     def buildTree
-        puts "PIECE : #{piece},  type. #{piece.type}"
         destination = @move
         moves = piece.moves
         position = piece.location
@@ -144,7 +142,6 @@ class Board
                             path.push(parent_node.position)
                             parent_node = parent_node.parent
                         end
-                        puts "path: #{path.reverse}"
                         return path.reverse
                     end
                 end
@@ -153,12 +150,7 @@ class Board
     end 
     
     def buildPath(location, destination, travel)
-        puts "BUILD! piece loc = #{location}"
-        path = []
-      
-        
-        puts "Loc: #{location}  destination: #{destination} travel: #{travel}"
-    
+        path = []      
         if travel[1] == 0 && travel[0] > 0
             travel_temp = travel[0]
             counter = 1
@@ -168,7 +160,6 @@ class Board
         end
         travel_temp.times do
             location[0] += counter
-            puts "loc check #{location}"
             if @board_array[location[0]][location[1]] == 0
                 temp = [location[0],location[1]]
                 path << temp
@@ -178,29 +169,39 @@ class Board
             end
         end
         return path
-
-
     end
 
     def is_valid_move?(move, row, col)        
          return ((move[0]+col) > -1) && ((move[0]+col) < 8) && ((move[1]+row) > -1) && ((move[1]+row) < 8) ? true : false
     end
-    
+
+    def checkPath(path, piece_coords)
+        to_move = true
+        path.each do |path_move|
+            puts "check path #{path_move}"
+            if path_move != piece_coords
+                temp_row = path_move[0]
+                temp_col = path_move[1]
+                if @board_array[path_move[0]][path_move[1]] != 0
+                    to_move = false
+                end
+            end
+        end
+        return to_move
+    end
 
     def convertCoords(coords)
         array = coords.split(//)
         temp = [] 
-        temp[0] = @@inputKeys[array[0]]
-        temp[1] = @@inputKeys[array[1].to_i]
+        temp[0] = @@input_keys[array[0]]
+        temp[1] = @@input_keys[array[1].to_i]
         array = temp.reverse
         return array
     end
 
     def getMove(player)
-
         puts "#{player} move: "
-        input = gets.chomp
-       
+        input = gets.chomp    
         if input.match(/[a-h][1-8][\s](\w*to\w*)[\s][a-h][1-8]/)
             input = input.split('to')
             @piece = input[0].rstrip
@@ -211,23 +212,11 @@ class Board
         end
         return @piece, @move
     end
-   # /def buildPossibles(piece)
-    #possibles = []
-    #moves = piece.moves
-    #current_row = piece.location[0]
-    #current_col = piece.location[1] 
-   # moves.each do |@move|
-    #    temp_row = (current_row - @move[0])
-    #    temp_col = (current_col - @move[1])
-    #    if (temp_row > -1) && (temp_row < 8) && (temp_col > -1) && (temp_col < 8)
-    #        possibles << [temp_row, temp_col]
-    #    end
-   # end
-    #return possibles
-    #end/
+
+    def checkMove(travel, piece)
+        return piece.moves.include?(travel) ? true : false
+    end
     
-
-
     def getTravel(move, piece) 
         loc = piece.location
         row = move[0]-loc[0]
@@ -236,22 +225,21 @@ class Board
         return travel
     end
 
-    def checkMove(travel, piece)
-        return piece.moves.include?(travel) ? true : false
-    end
-
     def placePiece(piece, move)
-        puts "inside PLACE: piece: #{piece}, #{piece.type},loc: #{piece.location} move: #{move}"
         current = piece.location
         piece.location = move        
         row = move[0]
         col = move[1]
-        puts "current #{current}"
         @board_array[current[0]][current[1]] = 0
-        puts "zero? #{@board_array[current[0]][current[1]]}"
         @board_array[row][col] = piece
         refresh
     end
+
+    def refresh
+        puts "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+        simplePrint
+        display        
+    end 
 
     def simplePrint       
         puts "\n\n"
@@ -277,12 +265,6 @@ class Board
         puts "               a b c d e f g h"
         puts "\n\n"
     end
-
-    def refresh
-        puts "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
-        simplePrint
-        display        
-    end 
     
     def display
         puts "\n\n\n"

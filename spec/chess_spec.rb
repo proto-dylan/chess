@@ -2,6 +2,8 @@
 require 'spec_helper'
 
 require './lib/chess_piece.rb' 
+require './lib/chess.rb'
+require './lib/chess_board.rb'
 
 
 
