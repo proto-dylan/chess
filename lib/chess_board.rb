@@ -89,17 +89,21 @@ class Board
         return @board_array
     end
 
-    def setBoard      
-        @board_array = [
-            [@br1,@bk1,@bb1,@bQq,@bKk,@bb2,@bk2,@br2],
-            [@bp1,@bp2,@bp3,@bp4,@bp5,@bp6,@bp7,@bp8],
-            [0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0],
-            [@wp1,@wp2,@wp3,@wp4,@wp5,@wp6,@wp7,@wp8],
-            [@wr1,@wk1,@wb1,@wKk,@wQq,@wb2,@wk2,@wr2]
-        ]   
+    def setBoard(array=nil)
+        if array.nil?     
+            @board_array = [
+                [@br1,@bk1,@bb1,@bQq,@bKk,@bb2,@bk2,@br2],
+                [@bp1,@bp2,@bp3,@bp4,@bp5,@bp6,@bp7,@bp8],
+                [0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0],
+                [@wp1,@wp2,@wp3,@wp4,@wp5,@wp6,@wp7,@wp8],
+                [@wr1,@wk1,@wb1,@wKk,@wQq,@wb2,@wk2,@wr2]
+            ]   
+        else
+            @board_array = array
+        end
         return @board_array
     end
 
@@ -177,12 +181,19 @@ class Board
 
     def checkPath(path, piece_coords)
         to_move = true
-        path.each do |path_move|
-            puts "check path #{path_move}"
-            if path_move != piece_coords
-                temp_row = path_move[0]
-                temp_col = path_move[1]
-                if @board_array[path_move[0]][path_move[1]] != 0
+        if path[0].instance_of?(Array)                                      #Must check if its a nested array before iteration!
+            path.each do |path_move|
+                if path_move != piece_coords
+                    temp_row = path_move[0]
+                    temp_col = path_move[1]
+                    if @board_array[path_move[0]][path_move[1]] != 0
+                        to_move = false
+                    end
+                end
+            end
+        else
+            if path != piece_coords
+                if @board_array[path[0]][path[1]] != 0
                     to_move = false
                 end
             end
@@ -207,8 +218,7 @@ class Board
             @piece = input[0].rstrip
             @move = input[1].strip
         else
-            puts "invalid @move"
-            takeTurn(@player)
+            return nil
         end
         return @piece, @move
     end
@@ -237,9 +247,31 @@ class Board
 
     def refresh
         puts "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
-        simplePrint
+        #simplePrint
         display        
     end 
+
+    def displayError(switch)
+        puts "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+        case switch
+        when 1
+            "Error, invalid move"
+        when 2
+            "Error, piece blocked"
+        when 3
+            "Error,"
+        end
+        
+        sleep(2)
+
+
+
+
+
+        puts "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+        
+
+    end
 
     def simplePrint       
         puts "\n\n"

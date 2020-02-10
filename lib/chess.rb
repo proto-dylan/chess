@@ -38,29 +38,26 @@ class Game
         if valid == false
             puts "Invalid @move"
         end
-        input_coords = @board.getMove(player)
-        
+        if !getMove.nil?
+            input_coords = @board.getMove(player)
+        else
+            board.displayError(1)
+            takeTurn(player)
+        end
         piece_coords = @board.convertCoords(input_coords[0])
         move_coords = @board.convertCoords(input_coords[1])
 
-        puts "piece_coords #{piece_coords}"
-        puts "move coords: #{move_coords}"
-        puts "@board.board_array: #{@board.board_array[piece_coords[0]][piece_coords[1]].type}"
-
-        @piece = @board.board_array[piece_coords[0]][piece_coords[1]] 
-        puts "piece #{@piece}, #{@piece.location}"    
+        @piece = @board.board_array[piece_coords[0]][piece_coords[1]]   
         @move = move_coords
-        puts "piece:  #{@piece.type},   move: #{@move}"
             
         if @piece.is_a?(Piece)
             if @piece.color != @player
                 puts "Wrong color, #{@player} turn"
                 takeTurn(@player)
             end
-            puts "outside check: move = #{@move} location = #{@piece.location}"
+            
             travel = @board.getTravel(@move, @piece)
-            puts "travel: #{travel}"
-            puts "piece loc #{@piece.location}"
+ 
             if @board.checkMove(travel, @piece)
                 to_move = true
                 path = @board.buildPath(piece_coords, @move, travel)
@@ -88,6 +85,7 @@ class Game
             takeTurn(@player)
         end
     end
+    
     def welcome
        
         puts "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
