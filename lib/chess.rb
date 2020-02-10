@@ -38,11 +38,10 @@ class Game
         if valid == false
             puts "Invalid @move"
         end
-        if !getMove.nil?
-            input_coords = @board.getMove(player)
-        else
-            board.displayError(1)
-            takeTurn(player)
+        input_coords = @board.getMove(@player)
+        if input_coords == 0
+            @board.displayError(1)
+            takeTurn(@player)
         end
         piece_coords = @board.convertCoords(input_coords[0])
         move_coords = @board.convertCoords(input_coords[1])
@@ -52,7 +51,7 @@ class Game
             
         if @piece.is_a?(Piece)
             if @piece.color != @player
-                puts "Wrong color, #{@player} turn"
+                @board.displayError(3)
                 takeTurn(@player)
             end
             

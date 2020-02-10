@@ -37,12 +37,14 @@ class Board
             end  
     end
 
-    def makePiece(type, color, uni, moves=0)
+    def makePiece(type, color, uni, moves=0, move_counter=0, attacking=[])
       piece = Piece.new(
             type: type,
             color: color,
             uni: uni,
-            moves: moves
+            moves: moves,
+            move_counter: move_counter,
+            attacking: attacking
         )
         return piece
     end
@@ -218,7 +220,7 @@ class Board
             @piece = input[0].rstrip
             @move = input[1].strip
         else
-            return nil
+            return 0
         end
         return @piece, @move
     end
@@ -242,7 +244,31 @@ class Board
         col = move[1]
         @board_array[current[0]][current[1]] = 0
         @board_array[row][col] = piece
+        piece.attacking = setAttacking(piece)
+        puts "piece.attacking: #{piece.attacking}"
         refresh
+    end
+
+    def setAttacking(piece)
+        if piece.type == 'pawn' 
+            attack = []
+            col = piece.location[1]
+          
+            if piece.color == 'white'
+                row = ((piece.location[0]) - 1)
+            else
+                row = ((piece.location[0]) + 1)
+            end
+            cols =[col+1, col +-1]                   #if black pawn, add one to row for diag attack, -1 for white
+            cols.each do |col| 
+                puts "row, #{row}, col #{col}"
+                if col > 0 && col < 9 
+                    attack << [row, col]
+                end
+            end   
+            puts "ATTACK array: #{attack}"
+            return attack
+        end
     end
 
     def refresh
@@ -252,25 +278,17 @@ class Board
     end 
 
     def displayError(switch)
-        puts "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+        puts "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
         case switch
         when 1
-            "Error, invalid move"
+            puts "Error, invalid move"
         when 2
-            "Error, piece blocked"
+            puts "Error, piece blocked"
         when 3
-            "Error,"
+            puts "Error, wrong color move"
         end
-        
-        sleep(2)
-
-
-
-
-
-        puts "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
-        
-
+        sleep(1.3)
+        puts "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
     end
 
     def simplePrint       

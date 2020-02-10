@@ -17,5 +17,7 @@ class Piece
     @color = color
     @moves = moves
     @location = location
+    @move_counter = move_counter
+    @attacking = attacking
     end
 end
