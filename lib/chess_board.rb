@@ -127,34 +127,34 @@ class Board
     end
     
 
-    def buildTree
-        destination = @move
-        moves = piece.moves
-        position = piece.location
-        root =  Node.new(position) 
-        root_node = [root]
-        col = position[0]
-        row = position[1]
-        path = []
-        while not root_node.empty? && path.empty?         
-            parent_node = root_node.shift
-            moves.each do |move|
-                if is_valid_move?(move, col, row)                  
-                    current = [parent_node.position[0]+move[0], parent_node.position[1]+move[1]]
-                    child = Node.new(current, parent_node)
-                    parent_node.children.push(child)
-                    root_node.push(child)                 
-                    if parent_node.position == destination                       
-                        while not parent_node.nil?
-                            path.push(parent_node.position)
-                            parent_node = parent_node.parent
-                        end
-                        return path.reverse
-                    end
-                end
-            end 
-        end    
-    end 
+    #def buildTree
+    #    destination = @move
+    #    moves = piece.moves
+    #    position = piece.location
+    #    root =  Node.new(position) 
+    #    root_node = [root]
+    #    col = position[0]
+    #    row = position[1]
+    #    path = []
+    #    while not root_node.empty? && path.empty?         
+    #        parent_node = root_node.shift
+    #        moves.each do |move|
+    #            if is_valid_move?(move, col, row)                  
+    #                current = [parent_node.position[0]+move[0], parent_node.position[1]+move[1]]
+    #                child = Node.new(current, parent_node)
+    #                parent_node.children.push(child)
+    #                root_node.push(child)                 
+    #                if parent_node.position == destination                       
+    #                    while not parent_node.nil?
+    #                        path.push(parent_node.position)
+    #                        parent_node = parent_node.parent
+    #                    end
+    #                    return path.reverse
+    #                end
+    #            end
+    #        end 
+    #    end    
+    #end 
     
     def buildPath(location, destination, travel)
         path = []      
@@ -228,6 +228,43 @@ class Board
         end
         return @piece, @move
     end
+    def checkPassant(travel, piece)
+        puts "CHECK PASSANT"
+        current = piece.location
+        adj = @board_array[current[0]][current[1]+travel[1]]
+        if adj != 0 && adj.color != piece.color && adj.type == 'pawn' && adj.move_counter == 1
+            if adj.location[0] == 3 || adj.location[0]==4 
+                return true
+            end
+        end
+        return false
+    end
+    def passant(travel, piece)
+        puts "EN  PASSANT !!!"
+        current = piece.location
+        puts "current: #{current}"
+        adj = @board_array[current[0]][current[1]+travel[1]]
+        puts "adj: #{adj.type}, #{adj.color}"
+        move_to = [(current[0]+travel[0]),(current[1]+travel[1])]
+        puts "move_to #{move_to}"    
+       # to_attack = @board_array[adj[0]][adj[1]]
+        #puts "To attack: #{to_attack}"
+
+        piece.location = move_to
+        @board_array[current[0]][current[1]] = 0
+        @board_array[move_to[0]][move_to[1]] = piece
+        dead = [adj.uni]
+        @board_array[adj.location[0]][adj.location[1]] = 0
+        refresh       
+        
+        if piece.color == 'black'
+            @white_dead.push(dead)
+            puts "white dead: #{white_dead}"
+        else
+            @black_dead.push(dead)
+            puts "black dead: #{black_dead}"
+        end
+    end
 
     def checkMove(travel, piece)
         if piece.type == 'pawn'
@@ -237,12 +274,17 @@ class Board
             else
                 temp_row = -1
             end
-            if travel == [temp_row,-1] || travel == [temp_row,1]                     #special case check for diag attacks not in "moves"
-                to_attack = @board_array[loc[0] + travel[0]][loc[1] + travel[1]]
-                if  to_attack != 0 
-                    if to_attack.color != piece.color
-                        return "attack"
-                    end 
+            if travel == [temp_row,-1] || travel == [temp_row,1]  
+                if checkPassant(travel, piece)
+                    puts "GO TO PASSAANY from checkMOVE"
+                    return "passant"
+                else                                    #special case check for diag attacks not in "moves"
+                    to_attack = @board_array[loc[0] + travel[0]][loc[1] + travel[1]]
+                    if  to_attack != 0 
+                        if to_attack.color != piece.color
+                            return "attack"
+                        end 
+                    end
                 end
             elsif piece.move_counter == 0
                 puts "pawns move 2 first move"
