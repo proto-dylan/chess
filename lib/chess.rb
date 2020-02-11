@@ -53,7 +53,8 @@ class Game
                 travel = @board.getTravel(@move, @piece)
                 check_move = @board.checkMove(travel, @piece)
                 if check_move == "attack"
-                    @board.placePiece(@piece, @move)
+                    @board.pawnAttack(@piece, @move)
+                    
                 elsif check_move == "valid"
                     to_move = true
                     path = @board.buildPath(piece_coords, @move, travel)

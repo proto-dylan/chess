@@ -18,14 +18,15 @@ class Board
     @@king_moves = [[1,0],[1,1],[0,1],[1,-1],[0,-1],[-1,-1],[-1,0],[-1,1]]   
     @@input_keys = {'a' => 0,'b' => 1,'c' => 2,'d' => 3,'e' => 4,'f' => 5,'g' => 6,'h' => 7,1 => 7,2 => 6,3 => 5,4 => 4,5 => 3,
         6 => 2,7 => 1,8 => 0}
-    @white_dead = []
-    @black_dead = []
+    
     def initialize 
         makePieces
         setBoard
         assignStartingLocations
         #refresh
         #simplePrint
+        @white_dead = []
+        @black_dead = []
     end
 
     class Node        
@@ -184,11 +185,6 @@ class Board
     def checkPath(path, piece_coords, type)
         to_move = 0                         #  -1 means no place, 0 means place, 1 means attack
 
-        /if type == 'pawn'
-                     
-
-        end/
-
         if path[0].instance_of?(Array)                                      #Must check if its a nested array before iteration!
             path.each do |path_move|
                 
@@ -262,29 +258,22 @@ class Board
         end
     end
 
-    def pawnAttack(piece, attack)
-        
+    def pawnAttack(piece, attack)       
         current = piece.location
-              
-        #to_attack = [current[0]+travel[0]],[current[1]+travel[0]]
+        puts "attack #{attack}"    
+        to_attack = @board_array[attack[0]][attack[1]]
         piece.location = attack
         row = attack[0]
         col = attack[1]
         @board_array[current[0]][current[1]] = 0
         @board_array[row][col] = piece
-        refresh
-
-        
-        puts "to attack: #{to_attack}"
+        refresh       
+        dead = [to_attack.uni]
         if piece.color == 'black'
-            @white_dead << to_attack
+            @white_dead.push(dead)
         else
-            @black_dead << to_attack
+            @black_dead.push(dead)
         end
-  
-       puts "white dead: #{@white_dead}"
-       puts "black dead: #{@black_dead}"
-
     end
     
     def getTravel(move, piece) 
@@ -295,7 +284,7 @@ class Board
         return travel
     end
 
-    def placePiece(piece, move)
+    def placePiece(piece, move, attack=0)
         current = piece.location
         piece.location = move        
         row = move[0]
