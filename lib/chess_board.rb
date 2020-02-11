@@ -181,25 +181,33 @@ class Board
          return ((move[0]+col) > -1) && ((move[0]+col) < 8) && ((move[1]+row) > -1) && ((move[1]+row) < 8) ? true : false
     end
 
-    def checkPath(path, piece_coords)
-        to_move = true
+    def checkPath(path, piece_coords, type)
+        to_move = 0                         #  -1 means no place, 0 means place, 1 means attack
+
+        /if type == 'pawn'
+                     
+
+        end/
+
         if path[0].instance_of?(Array)                                      #Must check if its a nested array before iteration!
             path.each do |path_move|
+                
                 if path_move != piece_coords
                     temp_row = path_move[0]
                     temp_col = path_move[1]
                     if @board_array[path_move[0]][path_move[1]] != 0
-                        to_move = false
+                        to_move = -1
                     end
                 end
             end
         else
             if path != piece_coords
                 if @board_array[path[0]][path[1]] != 0
-                    to_move = false
+                    to_move = -1
                 end
             end
         end
+
         return to_move
     end
 
@@ -226,7 +234,26 @@ class Board
     end
 
     def checkMove(travel, piece)
-        return piece.moves.include?(travel) ? true : false
+        if piece.type == 'pawn'
+            loc = piece.location
+            if piece.color == 'black' 
+                temp_row = 1
+            else
+                temp_row = -1
+            end
+            if travel == [temp_row,-1] || travel == [temp_row,1]
+                to_attack = @board_array[loc[0] + travel[0]][loc[1] + travel[1]]
+                if  to_attack != 0 
+                    if to_attack.color != piece.color
+                        return "ATTACK!!!"
+                    end 
+                end
+            else
+                return piece.moves.include?(travel) ? true : false
+            end
+        else
+            return piece.moves.include?(travel) ? true : false
+        end
     end
     
     def getTravel(move, piece) 
@@ -244,12 +271,10 @@ class Board
         col = move[1]
         @board_array[current[0]][current[1]] = 0
         @board_array[row][col] = piece
-        piece.attacking = setAttacking(piece)
-        puts "piece.attacking: #{piece.attacking}"
         refresh
     end
 
-    def setAttacking(piece)
+    def getPawnAttacking(piece)
         if piece.type == 'pawn' 
             attack = []
             col = piece.location[1]
@@ -267,8 +292,15 @@ class Board
                 end
             end   
             puts "ATTACK array: #{attack}"
+           / if attack.length == 1
+                attack.flatten!                   #either flatten here, or when the attcking array is iterated,
+            end/                                  # make sure its iterating over arrays, not integers!!
             return attack
         end
+    end
+    
+    def checkAttacking(piece)
+
     end
 
     def refresh

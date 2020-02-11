@@ -56,25 +56,38 @@ class Game
             end
             
             travel = @board.getTravel(@move, @piece)
- 
             if @board.checkMove(travel, @piece)
                 to_move = true
                 path = @board.buildPath(piece_coords, @move, travel)
+                
                 #@piece.location = piece_coords                    #I dont know why the location is being changed, but a reset is needed here
                 puts "Path: #{path}"
                 if path.nil?
                     puts "Invalid move, go again"
                     takeTurn(@player)
                 else
-                    to_move = @board.checkPath(path, piece_coords)
+                    type = @piece.type
+                    to_move = @board.checkPath(path, piece_coords, type)
                 end
-                if to_move == true
-                    puts "PLACE!"
-                    @board.placePiece(@piece, @move)
-                else
-                    valid = false
-                    takeTurn(@player, valid)
+
+                case to_move
+                    when to_move == 0               #place
+                        puts "PLACE!"
+                        @board.placePiece(@piece, @move)
+                        puts "move_counter before: #{@piece.move_counter}"
+                        @piece.move_counter += 1
+                        puts "move_counter after: #{@piece.move_counter}"
+                        if @piece.type == 'pawn'
+                            @piece.attacking = @board.getPawnAttacking(@piece)     #sets ATtacking for pawns new loc
+                            puts "piece.location: #{@piece.location}"
+                        end
+                    when to_move == -1              #error
+                        valid = false
+                        @board.displayError(1)
+                        takeTurn(@player, valid)
+                    when to_move == 1                #ATTACK!!    
                 end
+
             else
                 valid = false
                 takeTurn(@player, valid)
@@ -165,5 +178,5 @@ end
 
 
 
-game = Game.new
+#game = Game.new
    

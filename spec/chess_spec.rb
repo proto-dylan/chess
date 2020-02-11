@@ -184,9 +184,9 @@ describe Board do
             travel = [2,0]
             path = [[4,0],[5,0]]
 
-            check = board.checkPath(path, loc)
+            check = board.checkPath(path, loc, 'rook')
 
-            expect(check).to be false
+            expect(check).to eql(-1)
         end
         it "returns true if the rook move is valid and free" do
             
@@ -206,9 +206,9 @@ describe Board do
             travel = [-3,0]
             path = [[2,0],[1,0],[0,0]]
 
-            check = board.checkPath(path, loc)
+            check = board.checkPath(path, loc, 'rook')
 
-            expect(check).to be true
+            expect(check).to eql(0)
         end
     
     
@@ -230,9 +230,9 @@ describe Board do
             travel = [-1,0]
             path = [3,0]
 
-            check = board.checkPath(path, loc)
+            check = board.checkPath(path, loc, 'pawn')
 
-            expect(check).to be false
+            expect(check).to eql(-1)
         end
 
         it "returns true if the pawn isnt impeded" do
@@ -253,11 +253,38 @@ describe Board do
             travel = [1,0]
             path = [2,1]
 
-            check = board.checkPath(path, loc)
+            check = board.checkPath(path, loc, 'pawn')
 
-            expect(check).to be true
+            expect(check).to eql(0)
         end
-    
+        it "returns true if pawn input can attack" do
+            
+            board = Board.new
+            array = [
+                [0,@bk1,@bb1,@bQq,@bKk,@bb2,@bk2,@br2],
+                [0,@bp2,@bp3,@bp4,@bp5,@bp6,@bp7,@bp8],
+                [0,0,0,0,0,0,0,0],
+                [0,@br1,0,0,0,0,0,0],
+                [@wp1,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0],
+                [0,@wp2,@wp3,@wp4,@wp5,@wp6,@wp7,@wp8],
+                [@wr1,@wk1,@wb1,@wKk,@wQq,@wb2,@wk2,@wr2]
+            ]
+            
+
+            board.setBoard(array)
+            loc = [4,0]
+            dest = [3,1]
+            travel = [-1,1]
+            path = [3,1]
+            
+            piece = array[4][0]
+            piece.type = 'pawn'
+            check = board.checkMove(travel, piece)
+
+            expect(check).to eql("ATTACK!!!")
+
+        end
     
     
     
