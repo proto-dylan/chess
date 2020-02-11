@@ -158,22 +158,30 @@ class Board
     
     def buildPath(location, destination, travel)
         path = []      
+        puts "location #{location} dest #{destination}  travel #{travel}"
         if travel[1] == 0 && travel[0] > 0
-            travel_temp = travel[0]
-            counter = 1
+            travel_temp = travel[0]               #move down the board
+            counter_row = 1
+            counter_col = 0
         elsif travel[1] == 0 && travel[0] < 0
-            travel_temp = (travel[0]*(-1))
-            counter = -1
+            travel_temp = (travel[0]*(-1))          #move up the board
+            counter_row = -1
+            counter_col = 0
+        elsif travel[0] == 0 && travel[1] > 0
+            travel_temp = travel[1]                  #move right
+            counter_col = 1
+            counter_row = 0
+        elsif travel[0] == 0 && travel[1] < 0
+            travel_temp = (travel[1]*(-1))           #move left
+            counter_col = -1
+            counter_row = 0
         end
+
         travel_temp.times do
-            location[0] += counter
-            if @board_array[location[0]][location[1]] == 0
-                temp = [location[0],location[1]]
-                path << temp
-            else 
-                path = nil
-                return path
-            end
+            location[0] += counter_row
+            location[1] += counter_col
+            temp = [location[0],location[1]]
+            path << temp    
         end
         return path
     end
@@ -182,12 +190,10 @@ class Board
          return ((move[0]+col) > -1) && ((move[0]+col) < 8) && ((move[1]+row) > -1) && ((move[1]+row) < 8) ? true : false
     end
 
-    def checkPath(path, piece_coords, type)
+    def checkPath(path, piece_coords, type, color)
         to_move = 0                         #  -1 means no place, 0 means place, 1 means attack
-
         if path[0].instance_of?(Array)                                      #Must check if its a nested array before iteration!
-            path.each do |path_move|
-                
+            path.each do |path_move|               
                 if path_move != piece_coords
                     temp_row = path_move[0]
                     temp_col = path_move[1]
@@ -253,6 +259,7 @@ class Board
         piece.location = move_to
         @board_array[current[0]][current[1]] = 0
         @board_array[move_to[0]][move_to[1]] = piece
+        piece.move_counter += 1
         dead = [adj.uni]
         @board_array[adj.location[0]][adj.location[1]] = 0
         refresh       
@@ -309,6 +316,7 @@ class Board
         col = attack[1]
         @board_array[current[0]][current[1]] = 0
         @board_array[row][col] = piece
+        piece.move_counter += 1
         refresh       
         dead = [to_attack.uni]
         if piece.color == 'black'

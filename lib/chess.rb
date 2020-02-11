@@ -35,12 +35,12 @@ class Game
         @move = []
 
         input_coords = @board.getMove(@player)
-
+        puts "input_coords: #{input_coords}"
         if input_coords == 0
             @board.displayError(1)
             takeTurn(@player)
         elsif input_coords.length==2
-            puts "input_coords: #{input_coords}"
+            
             piece_coords = @board.convertCoords(input_coords[0])
             move_coords = @board.convertCoords(input_coords[1])
             @piece = @board.board_array[piece_coords[0]][piece_coords[1]]   
@@ -58,18 +58,21 @@ class Game
                     @board.passant(travel, @piece)
                 elsif check_move == "valid"
                     to_move = true
+
                     path = @board.buildPath(piece_coords, @move, travel)
+
                     puts "Path: #{path}"
-                    if path.nil?
-                        puts "Invalid move, go again"
-                        takeTurn(@player)
-                    else
+                    #if path.nil?
+                    #    puts "Invalid move, go again"
+                     #   takeTurn(@player)
+                    #else
                         type = @piece.type
-                        to_move = @board.checkPath(path, piece_coords, type)
-                    end              
+                        color = @piece.color
+                        to_move = @board.checkPath(path, piece_coords, type, color)
+                    #end              
                     case to_move
                         when 0               #place          
-                             @board.placePiece(@piece, @move)
+                            @board.placePiece(@piece, @move)
                             @piece.move_counter += 1 
                             if @piece.type == 'pawn'
                                 @piece.attacking = @board.getPawnAttacking(@piece.location, @piece.color)     #sets ATtacking for pawns new loc
