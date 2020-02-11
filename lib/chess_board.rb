@@ -241,15 +241,21 @@ class Board
             else
                 temp_row = -1
             end
-            if travel == [temp_row,-1] || travel == [temp_row,1]
+            if travel == [temp_row,-1] || travel == [temp_row,1]                     #special case check for diag attacks not in "moves"
                 to_attack = @board_array[loc[0] + travel[0]][loc[1] + travel[1]]
                 if  to_attack != 0 
                     if to_attack.color != piece.color
                         return "attack"
                     end 
                 end
-            else
+            elsif piece.move_counter == 0
+                puts "pawns move 2 first move"
                 return piece.moves.include?(travel) ? "valid" : "invalid"
+            else
+                puts "pawns move 1 after first move"
+                puts "piece.moves[0] #{piece.moves[0]}"
+                puts " travel  #{travel}"
+                return piece.moves[0]==travel ? "valid" : "invalid"
             end
         else
             return piece.moves.include?(travel) ? "valid" : "invalid"
