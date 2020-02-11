@@ -34,10 +34,6 @@ class Game
         @piece = []
         @move = []
 
-        
-        if valid == false
-            puts "Invalid @move"
-        end
         input_coords = @board.getMove(@player)
         if input_coords == 0
             @board.displayError(1)
@@ -56,7 +52,11 @@ class Game
             end
             
             travel = @board.getTravel(@move, @piece)
-            if @board.checkMove(travel, @piece)
+            check_move = @board.checkMove(travel, @piece)
+
+            if check_move == "attack"
+                @board.placePiece(@piece, @move)
+            elsif check_move == "valid"
                 to_move = true
                 path = @board.buildPath(piece_coords, @move, travel)
                 
@@ -68,26 +68,26 @@ class Game
                 else
                     type = @piece.type
                     to_move = @board.checkPath(path, piece_coords, type)
+                    puts "insinde TO MOVE #{to_move}"
                 end
-
+                puts "outsnsinde TO MOVE #{to_move}"
                 case to_move
-                    when to_move == 0               #place
+                    when 0               #place
                         puts "PLACE!"
                         @board.placePiece(@piece, @move)
                         puts "move_counter before: #{@piece.move_counter}"
                         @piece.move_counter += 1
                         puts "move_counter after: #{@piece.move_counter}"
                         if @piece.type == 'pawn'
-                            @piece.attacking = @board.getPawnAttacking(@piece)     #sets ATtacking for pawns new loc
+                            @piece.attacking = @board.getPawnAttacking(@piece.location, @piece.color)     #sets ATtacking for pawns new loc
                             puts "piece.location: #{@piece.location}"
                         end
-                    when to_move == -1              #error
+                    when -1              #error
                         valid = false
                         @board.displayError(1)
                         takeTurn(@player, valid)
-                    when to_move == 1                #ATTACK!!    
+                    when 1                #ATTACK!!    
                 end
-
             else
                 valid = false
                 takeTurn(@player, valid)
@@ -178,5 +178,5 @@ end
 
 
 
-#game = Game.new
+game = Game.new
    

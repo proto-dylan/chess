@@ -1,5 +1,5 @@
 class Board
-    attr_accessor :board_array
+    attr_accessor :board_array, :black_dead, :white_dead
 
     @@white_pawn_moves = [[-1,0],[-2,0]]
     @@black_pawn_moves = [[1,0],[2,0]]
@@ -15,11 +15,11 @@ class Board
     [-1,0],[-2,0],[-3,0],[-4,0],[-5,0],[-6,0],[-7,0],[1,1],[2,2],[3,3],[4,4],[5,5],
     [6,6],[7,7],[-1,1],[-2,2],[-3,3],[-4,4],[-5,5],[-6,6],[-7,7],[1,-1],[2,-2],
     [3,-3],[4,-4],[5,-5],[6,-6],[7,-7],[-1,-1],[-2,-2],[-3,-3],[-4,-4],[-5,-5],[-6,-6],[-7,-7]]
-    @@king_moves = [[1,0],[1,1],[0,1],[1,-1],[0,-1],[-1,-1],[-1,0],[-1,1]]    
-    
+    @@king_moves = [[1,0],[1,1],[0,1],[1,-1],[0,-1],[-1,-1],[-1,0],[-1,1]]   
     @@input_keys = {'a' => 0,'b' => 1,'c' => 2,'d' => 3,'e' => 4,'f' => 5,'g' => 6,'h' => 7,1 => 7,2 => 6,3 => 5,4 => 4,5 => 3,
         6 => 2,7 => 1,8 => 0}
-        
+    @white_dead = []
+    @black_dead = []
     def initialize 
         makePieces
         setBoard
@@ -245,15 +245,40 @@ class Board
                 to_attack = @board_array[loc[0] + travel[0]][loc[1] + travel[1]]
                 if  to_attack != 0 
                     if to_attack.color != piece.color
-                        return "ATTACK!!!"
+                        return "attack"
                     end 
                 end
             else
-                return piece.moves.include?(travel) ? true : false
+                return piece.moves.include?(travel) ? "valid" : "invalid"
             end
         else
-            return piece.moves.include?(travel) ? true : false
+            return piece.moves.include?(travel) ? "valid" : "invalid"
         end
+    end
+
+    def pawnAttack(piece, attack)
+        
+        current = piece.location
+              
+        #to_attack = [current[0]+travel[0]],[current[1]+travel[0]]
+        piece.location = attack
+        row = attack[0]
+        col = attack[1]
+        @board_array[current[0]][current[1]] = 0
+        @board_array[row][col] = piece
+        refresh
+
+        
+        puts "to attack: #{to_attack}"
+        if piece.color == 'black'
+            @white_dead << to_attack
+        else
+            @black_dead << to_attack
+        end
+  
+       puts "white dead: #{@white_dead}"
+       puts "black dead: #{@black_dead}"
+
     end
     
     def getTravel(move, piece) 
@@ -274,29 +299,27 @@ class Board
         refresh
     end
 
-    def getPawnAttacking(piece)
-        if piece.type == 'pawn' 
-            attack = []
-            col = piece.location[1]
-          
-            if piece.color == 'white'
-                row = ((piece.location[0]) - 1)
-            else
-                row = ((piece.location[0]) + 1)
-            end
-            cols =[col+1, col +-1]                   #if black pawn, add one to row for diag attack, -1 for white
-            cols.each do |col| 
-                puts "row, #{row}, col #{col}"
-                if col > 0 && col < 9 
-                    attack << [row, col]
-                end
-            end   
-            puts "ATTACK array: #{attack}"
-           / if attack.length == 1
-                attack.flatten!                   #either flatten here, or when the attcking array is iterated,
-            end/                                  # make sure its iterating over arrays, not integers!!
-            return attack
+    def getPawnAttacking(loc, color) 
+        attack = []
+        col = loc[1]
+        
+        if color == 'white'
+            row = ((loc[0]) - 1)
+        else
+            row = ((loc[0]) + 1)
         end
+        cols =[col+1, col +-1]                   #if black pawn, add one to row for diag attack, -1 for white
+        cols.each do |col| 
+            puts "row, #{row}, col #{col}"
+            if col > -1 && col < 9 
+                attack << [row, col]
+            end
+        end   
+        puts "ATTACK array: #{attack}"
+        / if attack.length == 1
+            attack.flatten!                   #either flatten here, or when the attcking array is iterated,
+        end/                                  # make sure its iterating over arrays, not integers!!
+        return attack
     end
     
     def checkAttacking(piece)
