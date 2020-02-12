@@ -27,7 +27,7 @@ class Board
         #simplePrint
         @white_dead = []
         @black_dead = []
-        @promotions = 0
+        @promotions = 3                    #start count higher than any existing piece instance name
     end
 
     class Node        
@@ -215,10 +215,14 @@ class Board
             path.each do |path_move|               
                 if @board_array[path_move[0]][path_move[1]] != 0
                     puts "BLOCK"
-                    if path_move == path.last && @board_array[path_move[0]][path_move[1]].color != color  
-                        to_move = 1 
+                    puts "path.last: #{path.last}, path_move: #{path_move}"
+                    if path_move == path.last
+                        if @board_array[path_move[0]][path_move[1]].color != color  
+                            to_move = 1 
+                        end
                     else                                    #check if the piece is enemy
                         to_move = -1
+                        return to_move
                     end
                 end
             end
@@ -242,7 +246,7 @@ class Board
         puts " move #{move}"
         if piece.moves.include?(travel)
             if @board_array[move[0]][move[1]] != 0 
-                puts "BLOCK"
+                puts "BLOCKknight"
                 if @board_array[move[0]][move[1]].color != piece.color
                     return 1
                 else
@@ -337,11 +341,15 @@ class Board
             elsif piece.move_counter == 0
                 return piece.moves.include?(travel) ? "valid" : "invalid"
             else
-                move_row = piece.location[0] + travel[0]
-                if move_row == 7 || move_row == 0
-                    return "promotion"
+                row = loc[0] + travel[0]
+                if @board_array[row][loc[1]] == 0
+                    if row == 7 || row == 0
+                        return "promotion"
+                    else
+                        return piece.moves[0]==travel ? "valid" : "invalid"
+                    end
                 else
-                    return piece.moves[0]==travel ? "valid" : "invalid"
+                    return "invalid"
                 end
             end
         else
@@ -394,9 +402,9 @@ class Board
         end
     end
     def promotion(piece, move)
-        
+        refresh
         color = piece.color
-        
+        loc = piece.location
         puts "Choose Promotion: "
         puts "  1) Queen"
         puts "  2) Bishop"
@@ -408,16 +416,35 @@ class Board
 
             when 1
                 puts "choice 1"
-                promo = "#{color[0]}#{piece.init}#{@promotions}"
+                promo = "#{color[0]}Q#{(@promotions-1)}"
                 puts "promo: #{promo}"
-                instance_variable_set("@#{promo}", makePiece("queen", color, "\u265B", @@queen_moves))
+                promotion = makePiece("queen", color, "\u265B", @@queen_moves)
+                puts "promotion #{promotion}"              
             when 2
-
+                puts "choice 2"
+                promo = "#{color[0]}b#{(@promotions-1)}"
+                puts "promo: #{promo}"
+                promotion = makePiece("bishop", color, "\u265D", @@bishop_moves)
+                puts "promotion #{promotion}"
             when 3
-
+                puts "choice 3"
+                promo = "#{color[0]}r#{(@promotions-1)}"
+                puts "promo: #{promo}"
+                promotion = makePiece("rook", color, "\u265C", @@rook_moves)
+                puts "promotion #{promotion}"
             when 4
-
+                puts "choice 4"
+                promo = "#{color[0]}k#{(@promotions-1)}"
+                puts "promo: #{promo}"
+                promotion = makePiece("knight", color, "\u265E", @@knight_moves)
+                puts "promotion #{promotion}"
         end
+
+        instance_variable_set("@#{promo}", promotion)
+        promotion.location = loc    
+  
+        return promotion
+
     end
     
     def getPawnAttacking(loc, color) 

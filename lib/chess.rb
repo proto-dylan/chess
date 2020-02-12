@@ -61,11 +61,16 @@ class Game
                 when "attack"
                     @board.pawnAttack(@piece, @move)
                 when "promotion"
+                    puts "first piece: #{@piece}, #{@piece.type}, #{@piece.color}, #{@piece.location}"
                     promo = @board.promotion(@piece, @move)
+                    puts "promo received: #{promo}"
+                    puts "promo loc: #{promo.location}"
+                    @piece = promo
+                    puts "second piece: #{@piece}, #{@piece.type}, #{@piece.color}, #{@piece.location}, #{@piece.uni}"
                     @board.placePiece(@piece, @move)
                 when "attack promotion"
-                    promo = @board.promotion(@piece, @move)
-                    @board.pawnAttack(@piece, @move, attack = 1)
+                    @piece = @board.promotion(@piece, @move)
+                    @board.pawnAttack(@piece, @move)
                 when "passant"
                     @board.passant(travel, @piece)
                 when "knight"
@@ -101,19 +106,19 @@ class Game
                         when -1              #error
                             valid = false
                             @board.displayError(1)
-                            takeTurn(@player, valid)
+                            takeTurn(@player)
                         when 1       
                             puts "ATTACK! switch"                               #attack
                            attack = 1
                            @board.placePiece(@piece, @move, attack)
                            @piece.move_counter += 1               
                     end
-                else
-                    valid = false
-                    takeTurn(@player, valid)
+                when "invalid"
+                    @board.displayError(1)
+                    takeTurn(@player)
                 end
             else
-                puts "No piece, choose again"
+                @board.displayError(1)
                 takeTurn(@player)
             end
         end
