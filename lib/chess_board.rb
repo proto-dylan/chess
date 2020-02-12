@@ -158,23 +158,40 @@ class Board
     
     def buildPath(location, destination, travel)
         path = []      
-        puts "location #{location} dest #{destination}  travel #{travel}"
-        if travel[1] == 0 && travel[0] > 0
-            travel_temp = travel[0]               #move down the board
-            counter_row = 1
-            counter_col = 0
-        elsif travel[1] == 0 && travel[0] < 0
-            travel_temp = (travel[0]*(-1))          #move up the board
-            counter_row = -1
-            counter_col = 0
-        elsif travel[0] == 0 && travel[1] > 0
-            travel_temp = travel[1]                  #move right
-            counter_col = 1
-            counter_row = 0
-        elsif travel[0] == 0 && travel[1] < 0
-            travel_temp = (travel[1]*(-1))           #move left
-            counter_col = -1
-            counter_row = 0
+        counter_col = 0
+        counter_row = 0
+    
+        if travel[1] == 0 
+            if travel[0] > 0
+                travel_temp = travel[0]               #move down the board
+                counter_row = 1   
+            elsif travel[0] < 0 
+                travel_temp = (travel[0]).abs         #move up the board
+                counter_row = -1
+            end
+        elsif travel[0] == 0 
+            if travel[1] > 0
+                travel_temp = travel[1]                  #move right
+                counter_col = 1       
+            elsif travel[1] < 0
+                travel_temp = (travel[1]).abs           #move left
+                counter_col = -1          
+            end
+        elsif (travel[0]).abs == (travel[1]).abs
+            travel_temp =  (travel[0]).abs    
+            if travel[0] > 0 && travel[1] > 0
+                counter_col = 1  
+                counter_row = 1                                           #move diag down right
+            elsif travel[0] > 0 && travel[1] < 0
+                counter_col = -1
+                counter_row = 1                                            #move down left
+            elsif travel[0] < 0 && travel[1] > 0
+                counter_col = 1
+                counter_row = -1                            #move up right
+            elsif travel[0] < 0 && travel[1] < 0
+                counter_col = -1
+                counter_row = -1                                                     #move up left
+            end   
         end
 
         travel_temp.times do
@@ -183,6 +200,7 @@ class Board
             temp = [location[0],location[1]]
             path << temp    
         end
+
         return path
     end
 
