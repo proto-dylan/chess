@@ -210,21 +210,31 @@ class Board
 
     def checkPath(path, piece_coords, type, color)
         to_move = 0                         #  -1 means no place, 0 means place, 1 means attack
-        if path[0].instance_of?(Array)                                      #Must check if its a nested array before iteration!
+        if path[0].instance_of?(Array)       #Must check if its a nested array before iteration!
             path.each do |path_move|               
                 if path_move != piece_coords
                     temp_row = path_move[0]
                     temp_col = path_move[1]
                     if @board_array[path_move[0]][path_move[1]] != 0
-                        to_move = -1
+                        puts "BLOCK"
+                        if path_move == path.last && @board_array[path_move[0]][path_move[1]].color != color  
+                            to_move = 1 
+                        else#check if the piece is enemy
+                            to_move = -1
+                        end
                     end
                 end
             end
-        else
+        else                                                    #if its just an array of two coords, [x,y]
             if path != piece_coords
                 if @board_array[path[0]][path[1]] != 0
-                    to_move = -1
+                    if @board_array[path[0]][path[1]].color != color
+                        to_move = 1
+                    else
+                        to_move = -1
+                    end
                 end
+
             end
         end
 
@@ -278,17 +288,10 @@ class Board
         @board_array[current[0]][current[1]] = 0
         @board_array[move_to[0]][move_to[1]] = piece
         piece.move_counter += 1
-        dead = [adj.uni]
+        dead = adj
         @board_array[adj.location[0]][adj.location[1]] = 0
-        refresh       
+        assignDead(dead)       
         
-        if piece.color == 'black'
-            @white_dead.push(dead)
-            puts "white dead: #{white_dead}"
-        else
-            @black_dead.push(dead)
-            puts "black dead: #{black_dead}"
-        end
     end
 
     def checkMove(travel, piece)
@@ -336,12 +339,19 @@ class Board
         @board_array[row][col] = piece
         piece.move_counter += 1
         refresh       
+        assignDead(to_attack)
+        puts "DEATH TALLYin apawn aattacj: BLACK #{@black_dead}"
+        puts "whiteL  #{@white_dead}"
+        
+    end
+    def assignDead(to_attack)
         dead = [to_attack.uni]
-        if piece.color == 'black'
+        if to_attack.color == 'white'
             @white_dead.push(dead)
         else
             @black_dead.push(dead)
         end
+        
     end
     
     def getTravel(move, piece) 
@@ -357,9 +367,16 @@ class Board
         piece.location = move        
         row = move[0]
         col = move[1]
+        to_attack = @board_array[row][col]
         @board_array[current[0]][current[1]] = 0
         @board_array[row][col] = piece
         refresh
+        puts "attack: #{attack}"
+        if attack == 1
+            puts "Attacked from placePiece"
+            assignDead(to_attack)
+            
+        end
     end
 
     def getPawnAttacking(loc, color) 
@@ -432,6 +449,8 @@ class Board
         puts "               _ _ _ _ _ _ _ _"
         puts "               a b c d e f g h"
         puts "\n\n"
+
+      
     end
     
     def display
@@ -486,5 +505,9 @@ class Board
         puts "\n"          
         puts "              a b c d e f g h  "
         puts "\n\n"
+
+        puts "DEATH TALLY: BLACK #{@black_dead}"
+        puts "whiteL  #{@white_dead}"
+        puts "\n\n\n"
     end
 end

@@ -62,14 +62,11 @@ class Game
                     path = @board.buildPath(piece_coords, @move, travel)
 
                     puts "Path: #{path}"
-                    #if path.nil?
-                    #    puts "Invalid move, go again"
-                     #   takeTurn(@player)
-                    #else
+            
                         type = @piece.type
                         color = @piece.color
                         to_move = @board.checkPath(path, piece_coords, type, color)
-                    #end              
+                        puts "to_move: #{to_move}"         
                     case to_move
                         when 0               #place          
                             @board.placePiece(@piece, @move)
@@ -81,7 +78,11 @@ class Game
                             valid = false
                             @board.displayError(1)
                             takeTurn(@player, valid)
-                        when 1                #ATTACK!!    
+                        when 1       
+                            puts "ATTACK! switch"                               #attack
+                           attack = 1
+                           @board.placePiece(@piece, @move, attack)
+                           @piece.move_counter += 1               
                     end
                 else
                     valid = false
