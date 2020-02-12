@@ -1,5 +1,5 @@
 class Board
-    attr_accessor :board_array, :black_dead, :white_dead
+    attr_accessor :board_array, :black_dead, :white_dead, :promotions
 
     @@white_pawn_moves = [[-1,0],[-2,0]]
     @@black_pawn_moves = [[1,0],[2,0]]
@@ -27,6 +27,7 @@ class Board
         #simplePrint
         @white_dead = []
         @black_dead = []
+        @promotions = 0
     end
 
     class Node        
@@ -280,9 +281,11 @@ class Board
         puts "CHECK PASSANT"
         current = piece.location
         adj = @board_array[current[0]][current[1]+travel[1]]
-        if adj != 0 && adj.color != piece.color && adj.type == 'pawn' && adj.move_counter == 1
-            if adj.location[0] == 3 || adj.location[0]==4 
-                return true
+        if adj != 0 && adj.color != piece.color 
+            if adj.type == 'pawn' && adj.move_counter == 1
+                if adj.location[0] == 3 || adj.location[0]==4 
+                    return true
+                end
             end
         end
         return false
@@ -318,24 +321,28 @@ class Board
             end
             if travel == [temp_row,-1] || travel == [temp_row,1]  
                 if checkPassant(travel, piece)
-                    puts "GO TO PASSAANY from checkMOVE"
                     return "passant"
-                else                                    #special case check for diag attacks not in "moves"
-                    to_attack = @board_array[loc[0] + travel[0]][loc[1] + travel[1]]
-                    if  to_attack != 0 
+                else                                                
+                    to_attack = @board_array[loc[0] + travel[0]][loc[1] + travel[1]]     
+                    if  to_attack != 0                                                   #special case check for diag attacks not in "moves"
                         if to_attack.color != piece.color
-                            return "attack"
+                            if to_attack.location[0] == 0 || to_attack.location[0] == 7
+                                return "attack promotion"
+                            else
+                                return "attack"
+                            end
                         end 
                     end
                 end
             elsif piece.move_counter == 0
-                puts "pawns move 2 first move"
                 return piece.moves.include?(travel) ? "valid" : "invalid"
             else
-                puts "pawns move 1 after first move"
-                puts "piece.moves[0] #{piece.moves[0]}"
-                puts " travel  #{travel}"
-                return piece.moves[0]==travel ? "valid" : "invalid"
+                move_row = piece.location[0] + travel[0]
+                if move_row == 7 || move_row == 0
+                    return "promotion"
+                else
+                    return piece.moves[0]==travel ? "valid" : "invalid"
+                end
             end
         else
             return piece.moves.include?(travel) ? "valid" : "invalid"
@@ -353,19 +360,16 @@ class Board
         @board_array[row][col] = piece
         piece.move_counter += 1
         refresh       
-        assignDead(to_attack)
-        puts "DEATH TALLYin apawn aattacj: BLACK #{@black_dead}"
-        puts "whiteL  #{@white_dead}"
-        
+        assignDead(to_attack)      
     end
+
     def assignDead(to_attack)
         dead = [to_attack.uni]
         if to_attack.color == 'white'
             @white_dead.push(dead)
         else
             @black_dead.push(dead)
-        end
-        
+        end     
     end
     
     def getTravel(move, piece) 
@@ -385,18 +389,40 @@ class Board
         @board_array[current[0]][current[1]] = 0
         @board_array[row][col] = piece
         refresh
-        puts "attack: #{attack}"
         if attack == 1
-            puts "Attacked from placePiece"
-            assignDead(to_attack)
-            
+            assignDead(to_attack)     
         end
     end
+    def promotion(piece, move)
+        
+        color = piece.color
+        
+        puts "Choose Promotion: "
+        puts "  1) Queen"
+        puts "  2) Bishop"
+        puts "  3) Rook"
+        puts "  4) Knight"
+        answer = gets.chomp.to_i
 
+        case answer
+
+            when 1
+                puts "choice 1"
+                promo = "#{color[0]}#{piece.init}#{@promotions}"
+                puts "promo: #{promo}"
+                instance_variable_set("@#{promo}", makePiece("queen", color, "\u265B", @@queen_moves))
+            when 2
+
+            when 3
+
+            when 4
+
+        end
+    end
+    
     def getPawnAttacking(loc, color) 
         attack = []
         col = loc[1]
-        
         if color == 'white'
             row = ((loc[0]) - 1)
         else
@@ -404,15 +430,10 @@ class Board
         end
         cols =[col+1, col +-1]                   #if black pawn, add one to row for diag attack, -1 for white
         cols.each do |col| 
-            puts "row, #{row}, col #{col}"
             if col > -1 && col < 9 
                 attack << [row, col]
             end
-        end   
-        puts "ATTACK array: #{attack}"
-        / if attack.length == 1
-            attack.flatten!                   #either flatten here, or when the attcking array is iterated,
-        end/                                  # make sure its iterating over arrays, not integers!!
+        end                                 # make sure its iterating over arrays, not integers!!
         return attack
     end
     

@@ -57,11 +57,18 @@ class Game
                 else
                     check_move = @board.checkMove(travel, @piece)
                 end
-                if check_move == "attack"
+                case check_move
+                when "attack"
                     @board.pawnAttack(@piece, @move)
-                elsif check_move == "passant"
+                when "promotion"
+                    promo = @board.promotion(@piece, @move)
+                    @board.placePiece(@piece, @move)
+                when "attack promotion"
+                    promo = @board.promotion(@piece, @move)
+                    @board.pawnAttack(@piece, @move, attack = 1)
+                when "passant"
                     @board.passant(travel, @piece)
-                elsif check_move == "knight"
+                when "knight"
                     check_knight = @board.knightCheck(@piece, @move, travel)
                     case check_knight 
                         when 1
@@ -78,18 +85,12 @@ class Game
                             @board.displayError(2)
                             takeTurn(@player)
                     end    
-                elsif check_move == "valid"
+                when "valid"
                     to_move = true
-
                     path = @board.buildPath(piece_coords, @move, travel)
-
-                    puts "Path: #{path}"
-            
                     type = @piece.type
                     color = @piece.color
-                    to_move = @board.checkPath(path, piece_coords, type, color)
-                    puts "to_move: #{to_move}"   
-
+                    to_move = @board.checkPath(path, piece_coords, type, color)  
                     case to_move
                         when 0               #place          
                             @board.placePiece(@piece, @move)
