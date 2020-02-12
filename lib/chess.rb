@@ -7,7 +7,7 @@ class Game
     def initialize
         @board = Board.new
         @win = false
-        @player = "black"
+        @player = "white"
         #welcome
         play
     end
@@ -52,11 +52,32 @@ class Game
                     takeTurn(@player)
                 end
                 travel = @board.getTravel(@move, @piece)
-                check_move = @board.checkMove(travel, @piece)
+                if @piece.type == 'knight'
+                    check_move = "knight"
+                else
+                    check_move = @board.checkMove(travel, @piece)
+                end
                 if check_move == "attack"
                     @board.pawnAttack(@piece, @move)
                 elsif check_move == "passant"
                     @board.passant(travel, @piece)
+                elsif check_move == "knight"
+                    check_knight = @board.knightCheck(@piece, @move, travel)
+                    case check_knight 
+                        when 1
+                            attack = 1
+                            @board.placePiece(@piece, @move, attack)
+                            @piece.move_counter += 1 
+                        when 0
+                            @board.placePiece(@piece, @move)
+                            @piece.move_counter += 1
+                        when -1
+                            @board.displayError(1)
+                            takeTurn(@player)
+                        when -2
+                            @board.displayError(2)
+                            takeTurn(@player)
+                    end    
                 elsif check_move == "valid"
                     to_move = true
 
@@ -64,10 +85,11 @@ class Game
 
                     puts "Path: #{path}"
             
-                        type = @piece.type
-                        color = @piece.color
-                        to_move = @board.checkPath(path, piece_coords, type, color)
-                        puts "to_move: #{to_move}"         
+                    type = @piece.type
+                    color = @piece.color
+                    to_move = @board.checkPath(path, piece_coords, type, color)
+                    puts "to_move: #{to_move}"   
+
                     case to_move
                         when 0               #place          
                             @board.placePiece(@piece, @move)

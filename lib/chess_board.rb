@@ -236,6 +236,24 @@ class Board
 
         return to_move
     end
+    def knightCheck(piece, move, travel)
+        
+        puts " move #{move}"
+        if piece.moves.include?(travel)
+            if @board_array[move[0]][move[1]] != 0 
+                puts "BLOCK"
+                if @board_array[move[0]][move[1]].color != piece.color
+                    return 1
+                else
+                    return -2
+                end
+            else
+                return 0
+            end
+        else
+            return -1
+        end
+    end
 
     def convertCoords(coords)
         array = coords.split(//)
@@ -444,9 +462,7 @@ class Board
         end
         puts "               _ _ _ _ _ _ _ _"
         puts "               a b c d e f g h"
-        puts "\n\n"
-
-      
+        puts "\n\n" 
     end
     
     def display
