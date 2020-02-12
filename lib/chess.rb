@@ -33,19 +33,16 @@ class Game
         @board.refresh
         @piece = []
         @move = []
-
         input_coords = @board.getMove(@player)
-        puts "input_coords: #{input_coords}"
+        
         if input_coords == 0
             @board.displayError(1)
             takeTurn(@player)
         elsif input_coords.length==2
-            puts "input coords #{input_coords}"
             piece_coords = @board.convertCoords(input_coords[0])
             move_coords = @board.convertCoords(input_coords[1])
             @piece = @board.board_array[piece_coords[0]][piece_coords[1]]   
-            @move = move_coords  
-            puts "piece? #{@piece}"  
+            @move = move_coords    
             if @piece.is_a?(Piece)
                 if @piece.color != @player
                     @board.displayError(3)
@@ -57,65 +54,61 @@ class Game
                 else
                     check_move = @board.checkMove(travel, @piece)
                 end
+
                 case check_move
-                when "attack"
-                    @board.pawnAttack(@piece, @move)
-                when "promotion"
-                    puts "first piece: #{@piece}, #{@piece.type}, #{@piece.color}, #{@piece.location}"
-                    promo = @board.promotion(@piece, @move)
-                    puts "promo received: #{promo}"
-                    puts "promo loc: #{promo.location}"
-                    @piece = promo
-                    puts "second piece: #{@piece}, #{@piece.type}, #{@piece.color}, #{@piece.location}, #{@piece.uni}"
-                    @board.placePiece(@piece, @move)
-                when "attack promotion"
-                    @piece = @board.promotion(@piece, @move)
-                    @board.pawnAttack(@piece, @move)
-                when "passant"
-                    @board.passant(travel, @piece)
-                when "knight"
-                    check_knight = @board.knightCheck(@piece, @move, travel)
-                    case check_knight 
-                        when 1
-                            attack = 1
-                            @board.placePiece(@piece, @move, attack)
-                            @piece.move_counter += 1 
-                        when 0
-                            @board.placePiece(@piece, @move)
-                            @piece.move_counter += 1
-                        when -1
-                            @board.displayError(1)
-                            takeTurn(@player)
-                        when -2
-                            @board.displayError(2)
-                            takeTurn(@player)
-                    end    
-                when "valid"
-                    to_move = true
-                    path = @board.buildPath(piece_coords, @move, travel)
-                    type = @piece.type
-                    color = @piece.color
-                    to_move = @board.checkPath(path, piece_coords, type, color)  
-                    case to_move
-                        when 0               #place          
-                            @board.placePiece(@piece, @move)
-                            @piece.move_counter += 1 
-                            if @piece.type == 'pawn'
-                                @piece.attacking = @board.getPawnAttacking(@piece.location, @piece.color)     #sets ATtacking for pawns new loc
-                            end
-                        when -1              #error
-                            valid = false
-                            @board.displayError(1)
-                            takeTurn(@player)
-                        when 1       
-                            puts "ATTACK! switch"                               #attack
-                           attack = 1
-                           @board.placePiece(@piece, @move, attack)
-                           @piece.move_counter += 1               
-                    end
-                when "invalid"
-                    @board.displayError(1)
-                    takeTurn(@player)
+                    when "attack"
+                        @board.pawnAttack(@piece, @move)
+                    when "promotion"
+                        promo = @board.promotion(@piece, @move)
+                        @piece = promo
+                        @board.placePiece(@piece, @move)
+                    when "attack promotion"
+                        @piece = @board.promotion(@piece, @move)
+                        @board.pawnAttack(@piece, @move)
+                    when "passant"
+                        @board.passant(travel, @piece)
+                    when "knight"
+                        check_knight = @board.knightCheck(@piece, @move, travel)
+                        case check_knight 
+                            when 1
+                                attack = 1
+                                @board.placePiece(@piece, @move, attack)
+                                @piece.move_counter += 1 
+                            when 0
+                                @board.placePiece(@piece, @move)
+                                @piece.move_counter += 1
+                            when -1
+                                @board.displayError(1)
+                                takeTurn(@player)
+                            when -2
+                                @board.displayError(2)
+                                takeTurn(@player)
+                        end    
+                    when "valid"
+                        to_move = true
+                        path = @board.buildPath(piece_coords, @move, travel)
+                        type = @piece.type
+                        color = @piece.color
+                        to_move = @board.checkPath(path, piece_coords, type, color)  
+                        case to_move
+                            when 0               #place          
+                                @board.placePiece(@piece, @move)
+                                @piece.move_counter += 1 
+                                if @piece.type == 'pawn'
+                                    @piece.attacking = @board.getPawnAttacking(@piece.location, @piece.color)     #sets ATtacking for pawns new loc
+                                end
+                            when -1              #error
+                                valid = false
+                                @board.displayError(1)
+                                takeTurn(@player)
+                            when 1      
+                                attack = 1
+                                @board.placePiece(@piece, @move, attack)
+                                @piece.move_counter += 1               
+                        end
+                    when "invalid"
+                        @board.displayError(1)
+                        takeTurn(@player)
                 end
             else
                 @board.displayError(1)

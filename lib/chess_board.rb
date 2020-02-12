@@ -238,11 +238,10 @@ class Board
 
             end
         end
-
         return to_move
     end
+
     def knightCheck(piece, move, travel)
-        
         puts " move #{move}"
         if piece.moves.include?(travel)
             if @board_array[move[0]][move[1]] != 0 
@@ -281,38 +280,34 @@ class Board
         end
         return @piece, @move
     end
+
     def checkPassant(travel, piece)
         puts "CHECK PASSANT"
         current = piece.location
         adj = @board_array[current[0]][current[1]+travel[1]]
         if adj != 0 && adj.color != piece.color 
-            if adj.type == 'pawn' && adj.move_counter == 1
-                if adj.location[0] == 3 || adj.location[0]==4 
-                    return true
+            if adj.type == 'pawn' 
+                if adj.move_counter == 1
+                    if adj.location[0] == 3 || adj.location[0]==4 
+                        return true
+                    end
                 end
             end
         end
         return false
     end
-    def passant(travel, piece)
-        puts "EN  PASSANT !!!"
-        current = piece.location
-        puts "current: #{current}"
-        adj = @board_array[current[0]][current[1]+travel[1]]
-        puts "adj: #{adj.type}, #{adj.color}"
-        move_to = [(current[0]+travel[0]),(current[1]+travel[1])]
-        puts "move_to #{move_to}"    
-       # to_attack = @board_array[adj[0]][adj[1]]
-        #puts "To attack: #{to_attack}"
 
-        piece.location = move_to
-        @board_array[current[0]][current[1]] = 0
-        @board_array[move_to[0]][move_to[1]] = piece
+    def passant(travel, piece)
+        current = piece.location
+        adj = @board_array[current[0]][current[1]+travel[1]]            #the piece to capture
+        move_to = [(current[0]+travel[0]),(current[1]+travel[1])]       #the loc of the final position after passant
+        piece.location = move_to                                        #set new piece loc
+        @board_array[current[0]][current[1]] = 0                        #reset passed piece loc              
+        @board_array[move_to[0]][move_to[1]] = piece                    
         piece.move_counter += 1
         dead = adj
         @board_array[adj.location[0]][adj.location[1]] = 0
         assignDead(dead)       
-        
     end
 
     def checkMove(travel, piece)
