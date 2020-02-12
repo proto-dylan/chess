@@ -200,7 +200,7 @@ class Board
             temp = [location[0],location[1]]
             path << temp    
         end
-
+        puts "PATH: #{path}"
         return path
     end
 
@@ -212,16 +212,12 @@ class Board
         to_move = 0                         #  -1 means no place, 0 means place, 1 means attack
         if path[0].instance_of?(Array)       #Must check if its a nested array before iteration!
             path.each do |path_move|               
-                if path_move != piece_coords
-                    temp_row = path_move[0]
-                    temp_col = path_move[1]
-                    if @board_array[path_move[0]][path_move[1]] != 0
-                        puts "BLOCK"
-                        if path_move == path.last && @board_array[path_move[0]][path_move[1]].color != color  
-                            to_move = 1 
-                        else#check if the piece is enemy
-                            to_move = -1
-                        end
+                if @board_array[path_move[0]][path_move[1]] != 0
+                    puts "BLOCK"
+                    if path_move == path.last && @board_array[path_move[0]][path_move[1]].color != color  
+                        to_move = 1 
+                    else                                    #check if the piece is enemy
+                        to_move = -1
                     end
                 end
             end
@@ -455,11 +451,12 @@ class Board
     
     def display
         puts "\n\n\n"
+        puts "              a b c d e f g h  "
         counter = 8
         toggle = 0
         toggle2 = 0
         8.times do |row|
-            puts "\n"
+            
             print "            #{counter} "
             counter -=1
             if toggle2 == 1 
@@ -501,13 +498,16 @@ class Board
             else
                 toggle2 = 0
             end
+            puts " #{counter+1} "
+            
         end  
-        puts "\n"          
+                
         puts "              a b c d e f g h  "
         puts "\n\n"
 
-        puts "DEATH TALLY: BLACK #{@black_dead}"
-        puts "whiteL  #{@white_dead}"
+        puts "DEATH TALLY: "
+        puts " BLACK:  #{@black_dead}"
+        puts " WHITE:  #{@white_dead}"
         puts "\n\n\n"
     end
 end

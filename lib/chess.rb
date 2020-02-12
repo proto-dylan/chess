@@ -40,11 +40,12 @@ class Game
             @board.displayError(1)
             takeTurn(@player)
         elsif input_coords.length==2
-            
+            puts "input coords #{input_coords}"
             piece_coords = @board.convertCoords(input_coords[0])
             move_coords = @board.convertCoords(input_coords[1])
             @piece = @board.board_array[piece_coords[0]][piece_coords[1]]   
-            @move = move_coords    
+            @move = move_coords  
+            puts "piece? #{@piece}"  
             if @piece.is_a?(Piece)
                 if @piece.color != @player
                     @board.displayError(3)
