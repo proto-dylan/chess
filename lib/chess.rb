@@ -107,8 +107,7 @@ class Game
                                 @board.placePiece(@piece, @move, attack)
                                 @piece.move_counter += 1  
                         end
-                        @piece.attacking = @board.setAttacking(@piece)
-                        puts "@piece.attacking: #{@piece.attacking}"
+                        
                     when "invalid"
                         @board.displayError(1)
                         takeTurn(@player)

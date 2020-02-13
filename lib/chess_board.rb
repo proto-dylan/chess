@@ -393,7 +393,10 @@ class Board
         if attack == 1
             assignDead(to_attack)     
         end
+        @piece.attacking = @board.setAttacking(@piece)
+        puts "@piece.attacking: #{@piece.attacking}"
     end
+
     def promotion(piece, move)
         refresh
         color = piece.color
@@ -456,6 +459,7 @@ class Board
         end                                 # make sure its iterating over arrays, not integers!!
         return attack
     end
+    
     def buildPossiblesKnight(piece)
         moves = piece.moves
         loc = piece.location
