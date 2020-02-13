@@ -8,6 +8,7 @@ class Game
         @board = Board.new
         @win = false
         @player = "white"
+        
         #welcome
         play
     end
@@ -39,16 +40,17 @@ class Game
                 move_coords = @board.convertCoords(input_coords[1])
                 piece = @board.board_array[piece_coords[0]][piece_coords[1]]   
                 move = move_coords  
-                puts "piece #{piece}, #{piece.type}, #{piece.color}"
-
                 if piece.is_a?(Piece)
                     if piece.color == player
-                        puts "true"
                         check = true
                     else 
                         @board.displayError(3)
                     end
+                else
+                    @board.displayError(1)
                 end 
+            else
+                @board.displayError(1)
             end       
         end 
         return piece, move, piece_coords, move_coords
@@ -65,6 +67,7 @@ class Game
 
         puts "piece: #{@piece}, move #{@move}"
         puts "piece_coords #{piece_coords}, move_coords #{move_coords}"
+        puts "piece attack before turn #{@piece.attacking}"
         travel = @board.getTravel(@move, @piece)
 
         if @piece.type == 'knight'
@@ -127,17 +130,8 @@ class Game
             when "invalid"
                 @board.displayError(1)
                 takeTurn(@player)
-            
-            #else
-            #    @board.displayError(1)
-            #    takeTurn(@player)
-            #end
         end
-        @piece.attacking = @board.setAttacking(@piece)                       #if the loops gets here, a piece has been played
-        puts "@piece.attacking: #{@piece.attacking}"
-        puts "has invalid been assign?"    
-                            #so always set attacking[]
-
+        @board.setAllAttacking
     end
     
     def welcome

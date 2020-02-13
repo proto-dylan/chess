@@ -1,6 +1,7 @@
 class Board
     attr_accessor :board_array, :black_dead, :white_dead, :promotions
-
+    @@diagonals = [[-1,1],[1,1],[1,-1],[-1,-1]]
+    @@cardinals = [[-1,0],[1,0],[0,-1],[0,1]]
     @@white_pawn_moves = [[-1,0],[-2,0]]
     @@black_pawn_moves = [[1,0],[2,0]]
     @@knight_moves = [[-1,2],[1,2],[2,1],[2,-1],[1,-2],[-1,-2],[-2,-1],[-2,1]]  
@@ -23,11 +24,13 @@ class Board
         makePieces
         setBoard
         assignStartingLocations
+        setAllAttacking
         #refresh
         #simplePrint
         @white_dead = []
         @black_dead = []
         @promotions = 3                    #start count higher than any existing piece instance name
+        
     end
 
     class Node        
@@ -127,41 +130,10 @@ class Board
         return @board_array
     end
     
-
-    #def buildTree
-    #    destination = @move
-    #    moves = piece.moves
-    #    position = piece.location
-    #    root =  Node.new(position) 
-    #    root_node = [root]
-    #    col = position[0]
-    #    row = position[1]
-    #    path = []
-    #    while not root_node.empty? && path.empty?         
-    #        parent_node = root_node.shift
-    #        moves.each do |move|
-    #            if is_valid_move?(move, col, row)                  
-    #                current = [parent_node.position[0]+move[0], parent_node.position[1]+move[1]]
-    #                child = Node.new(current, parent_node)
-    #                parent_node.children.push(child)
-    #                root_node.push(child)                 
-    #                if parent_node.position == destination                       
-    #                    while not parent_node.nil?
-    #                        path.push(parent_node.position)
-    #                        parent_node = parent_node.parent
-    #                    end
-    #                    return path.reverse
-    #                end
-    #            end
-    #        end 
-    #    end    
-    #end 
-    
     def buildPath(location, destination, travel)
         path = []      
         counter_col = 0
         counter_row = 0
-    
         if travel[1] == 0 
             if travel[0] > 0
                 travel_temp = travel[0]               #move down the board
@@ -194,18 +166,14 @@ class Board
                 counter_row = -1                                                     #move up left
             end   
         end
-
         travel_temp.times do
             location[0] += counter_row
             location[1] += counter_col
             temp = [location[0],location[1]]
             path << temp    
         end
-        puts "PATH: #{path}"
         return path
     end
-
-   
 
     def checkPath(path, piece_coords, type, color)
         to_move = 0                         #  -1 means no place, 0 means place, 1 means attack
@@ -238,10 +206,8 @@ class Board
     end
 
     def knightCheck(piece, move, travel)
-        puts " move #{move}"
         if piece.moves.include?(travel)
             if @board_array[move[0]][move[1]] != 0 
-                puts "BLOCKknight"
                 if @board_array[move[0]][move[1]].color != piece.color
                     return 1
                 else
@@ -278,7 +244,6 @@ class Board
     end
 
     def checkPassant(travel, piece)
-        puts "CHECK PASSANT"
         current = piece.location
         adj = @board_array[current[0]][current[1]+travel[1]]
         if adj != 0 && adj.color != piece.color 
@@ -389,8 +354,7 @@ class Board
         refresh
         if attack == 1
             assignDead(to_attack)     
-        end
-       
+        end      
     end
 
     def promotion(piece, move)
@@ -403,29 +367,22 @@ class Board
         puts "  3) Rook"
         puts "  4) Knight"
         answer = gets.chomp.to_i
-
         case answer
-
             when 1
                 promo = "#{color[0]}Q#{(@promotions-1)}"
-                promotion = makePiece("queen", color, "\u265B", @@queen_moves)
-              
+                promotion = makePiece("queen", color, "\u265B", @@queen_moves)             
             when 2
                 promo = "#{color[0]}b#{(@promotions-1)}"
                 promotion = makePiece("bishop", color, "\u265D", @@bishop_moves)
-
             when 3
                 promo = "#{color[0]}r#{(@promotions-1)}"
                 promotion = makePiece("rook", color, "\u265C", @@rook_moves)
-
             when 4
                 promo = "#{color[0]}k#{(@promotions-1)}"
                 promotion = makePiece("knight", color, "\u265E", @@knight_moves)
         end
-
         instance_variable_set("@#{promo}", promotion)
-        promotion.location = loc    
-  
+        promotion.location = loc   
         return promotion
 
     end
@@ -465,41 +422,66 @@ class Board
         return (move[0] > -1) && (move[0] < 8) && (move[1] > -1) && (move[1] < 8) ? true : false
     end
     
-    def recursiveDiag(loc,diag)
+    def recursiveCheck(loc,bump)
         temp = loc
-        temp =[(temp[0]+diag[0]),(temp[1]+diag[1])]
-        puts "TEMP in recur: #{temp}"
-       
-        if @board_array[temp[0]][temp[1]] == 0 && is_valid_move?(temp)
-            rec_temp = [(temp[0]+diag[0]),(temp[1]+diag[1])]
-            if is_valid_move?(rec_temp)
-                recursiveDiag(temp, diag)
-            else
-                puts "exit recur, edge of board"
-                return temp
+        temp =[(temp[0]+bump[0]),(temp[1]+bump[1])]
+        if is_valid_move?(temp)
+            if @board_array[temp[0]][temp[1]] == 0 
+                rec_temp = [(temp[0]+bump[0]),(temp[1]+bump[1])]
+                if is_valid_move?(rec_temp)
+                    recursiveCheck(temp, bump)
+                else
+                    return temp
+                end
             end
         else
-            puts "exit recur"
             return temp
         end
     end
 
-    def buildPossiblesDiags(piece)
+    def buildPossibles(piece, array)
         loc = piece.location
-        attack = []
-        
-        diags = [[-1,1],[1,1],[1,-1],[-1,-1]]
-
-        diags.each do |diag|
-            attack << recursiveDiag(loc, diag)
+        attack = [] 
+        array.each do |coord|
+            temp_attack = recursiveCheck(loc, coord)
+            if temp_attack != nil
+                attack << temp_attack
+            end
         end
-        puts "attacks after buildPossibleDiags: #{attack}"
         return attack
     end
 
-    def buildPossiblesCardinal
- 
+    def getKingAttacking(piece)
+        array = (@@diagonals+@@cardinals)
+        attack = []
+        array.each do |coord|
+            if is_valid_move?(coord)
+                attack << coord
+            end
+        end
+        return attack 
+    end
 
+    def setAllAttacking
+        col=0
+        row=0
+        8.times do
+            8.times do
+                piece = @board_array[row][col]
+                if piece != 0
+                    attack = setAttacking(piece)
+                    puts "#{piece.type}, #{piece.color}," 
+                    puts "atacking #{attack}"
+                    puts "\n\n"  
+                    if attack != nil
+                        piece.attacking << attack
+                    end
+                end
+                col +=1
+            end
+            col = 0
+            row +=1            
+        end
     end
     
     def setAttacking(piece)
@@ -508,14 +490,19 @@ class Board
         elsif piece.type == 'knight'
             return buildPossiblesKnight(piece)
         elsif piece.type == 'bishop'
-            buildPossiblesDiags(piece)
+            return buildPossibles(piece, @@diagonals)
+        elsif piece.type == 'rook'
+            return buildPossibles(piece, @@cardinals)
+        elsif piece.type == 'queen'
+            return ((buildPossibles(piece, @@diagonals))+(buildPossibles(piece, @@cardinals)))
+        elsif piece.type == 'king'
+            return getKingAttacking(piece)
         end
     end
 
     def refresh
         puts "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
-        #simplePrint
-        
+        #simplePrint    
         display        
     end 
 
@@ -565,8 +552,7 @@ class Board
         counter = 8
         toggle = 0
         toggle2 = 0
-        8.times do |row|
-            
+        8.times do |row|    
             print "            #{counter} "
             counter -=1
             if toggle2 == 1 
@@ -608,13 +594,10 @@ class Board
             else
                 toggle2 = 0
             end
-            puts " #{counter+1} "
-            
-        end  
-                
+            puts " #{counter+1} " 
+        end         
         puts "              a b c d e f g h  "
         puts "\n\n"
-
         puts "DEATH TALLY: "
         puts " BLACK:  #{@black_dead}"
         puts " WHITE:  #{@white_dead}"
