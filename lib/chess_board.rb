@@ -531,6 +531,7 @@ class Board
         end
         sleep(1.3)
         puts "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+        refresh
     end
 
     def simplePrint       
