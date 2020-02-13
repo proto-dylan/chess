@@ -214,8 +214,6 @@ class Board
         if path[0].instance_of?(Array)       #Must check if its a nested array before iteration!
             path.each do |path_move|               
                 if @board_array[path_move[0]][path_move[1]] != 0
-                    puts "BLOCK"
-                    puts "path.last: #{path.last}, path_move: #{path_move}"
                     if path_move == path.last
                         if @board_array[path_move[0]][path_move[1]].color != color  
                             to_move = 1 
@@ -458,14 +456,45 @@ class Board
         end                                 # make sure its iterating over arrays, not integers!!
         return attack
     end
+    def buildPossiblesKnight(piece)
+        moves = piece.moves
+        loc = piece.location
+        moves.each do |move|
+        attack = []
+            if (loc[0]+move[0]) > -1 && (loc[0]+move[0]) < 8
+                if  (loc[1]+move[1]) > -1 && (loc[1]+move[1]) < 8 
+                    attack << [(loc[0]+move[0]),(loc[1]+move[1])]
+                end
+            end
+        end
+        return attack
+            
+    end
+
+    def buildPossiblesDiags
+
+
+    end
+
+    def buildPossiblesCardinal
+ 
+
+    end
     
-    def checkAttacking(piece)
+    def setAttacking(piece)
+        if piece.type == 'knight'
+            return buildPossiblesKnight(piece)
+        end
+
+
+
 
     end
 
     def refresh
         puts "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
         #simplePrint
+        
         display        
     end 
 

@@ -34,7 +34,7 @@ class Game
         @piece = []
         @move = []
         input_coords = @board.getMove(@player)
-        
+
         if input_coords == 0
             @board.displayError(1)
             takeTurn(@player)
@@ -97,6 +97,7 @@ class Game
                                 if @piece.type == 'pawn'
                                     @piece.attacking = @board.getPawnAttacking(@piece.location, @piece.color)     #sets ATtacking for pawns new loc
                                 end
+
                             when -1              #error
                                 valid = false
                                 @board.displayError(1)
@@ -104,8 +105,10 @@ class Game
                             when 1      
                                 attack = 1
                                 @board.placePiece(@piece, @move, attack)
-                                @piece.move_counter += 1               
+                                @piece.move_counter += 1  
                         end
+                        @piece.attacking = @board.setAttacking(@piece)
+                        puts "@piece.attacking: #{@piece.attacking}"
                     when "invalid"
                         @board.displayError(1)
                         takeTurn(@player)
