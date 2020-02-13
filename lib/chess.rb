@@ -30,10 +30,12 @@ class Game
     end
 
     def takeTurn(player, valid=true)
+        puts "Start take trun"
         @board.refresh
         @piece = []
         @move = []
         input_coords = @board.getMove(@player)
+        check_move = ''
 
         if input_coords == 0
             @board.displayError(1)
@@ -48,12 +50,15 @@ class Game
                     @board.displayError(3)
                     takeTurn(@player)
                 end
+                
+
                 travel = @board.getTravel(@move, @piece)
                 if @piece.type == 'knight'
                     check_move = "knight"
                 else
                     check_move = @board.checkMove(travel, @piece)
                 end
+                puts "check move: #{check_move}"
 
                 case check_move
                     when "attack"
@@ -90,13 +95,16 @@ class Game
                                 takeTurn(@player)
                         end    
                     when "valid"
+                        puts "valid HERE"
                         to_move = true
                         path = @board.buildPath(piece_coords, @move, travel)
                         type = @piece.type
                         color = @piece.color
                         to_move = @board.checkPath(path, piece_coords, type, color)  
+                        puts "to move: #{to_move}"
                         case to_move
-                            when 0               #place          
+                            when 0
+                                puts "placepiece"               #place          
                                 @board.placePiece(@piece, @move)
                                 @piece.move_counter += 1 
                                # if @piece.type == 'pawn'
@@ -116,6 +124,7 @@ class Game
                                 @piece.move_counter += 1  
                                
                         end
+                        puts "valid here? should be done #{to_move}"
                      when "invalid"
                         @board.displayError(1)
                         takeTurn(@player)
@@ -126,7 +135,9 @@ class Game
             end
         end
         @piece.attacking = @board.setAttacking(@piece)                       #if the loops gets here, a piece has been played
-        puts "@piece.attacking: #{@piece.attacking}"                         #so always set attacking[]
+        puts "@piece.attacking: #{@piece.attacking}"
+        puts "has invalid been assign?"    
+                            #so always set attacking[]
 
     end
     

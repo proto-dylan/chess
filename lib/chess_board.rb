@@ -205,9 +205,7 @@ class Board
         return path
     end
 
-    def is_valid_move?(move, row, col)        
-         return ((move[0]+col) > -1) && ((move[0]+col) < 8) && ((move[1]+row) > -1) && ((move[1]+row) < 8) ? true : false
-    end
+   
 
     def checkPath(path, piece_coords, type, color)
         to_move = 0                         #  -1 means no place, 0 means place, 1 means attack
@@ -463,9 +461,40 @@ class Board
         return attack     
     end
 
-    def buildPossiblesDiags
+    def is_valid_move?(move)        
+        return (move[0] > -1) && (move[0] < 8) && (move[1] > -1) && (move[1] < 8) ? true : false
+    end
+    
+    def recursiveDiag(loc,diag)
+        temp = loc
+        temp =[(temp[0]+diag[0]),(temp[1]+diag[1])]
+        puts "TEMP in recur: #{temp}"
+       
+        if @board_array[temp[0]][temp[1]] == 0 && is_valid_move?(temp)
+            rec_temp = [(temp[0]+diag[0]),(temp[1]+diag[1])]
+            if is_valid_move?(rec_temp)
+                recursiveDiag(temp, diag)
+            else
+                puts "exit recur, edge of board"
+                return temp
+            end
+        else
+            puts "exit recur"
+            return temp
+        end
+    end
 
+    def buildPossiblesDiags(piece)
+        loc = piece.location
+        attack = []
+        
+        diags = [[-1,1],[1,1],[1,-1],[-1,-1]]
 
+        diags.each do |diag|
+            attack << recursiveDiag(loc, diag)
+        end
+        puts "attacks after buildPossibleDiags: #{attack}"
+        return attack
     end
 
     def buildPossiblesCardinal
@@ -478,11 +507,9 @@ class Board
             return getPawnAttacking(piece.location, piece.color)
         elsif piece.type == 'knight'
             return buildPossiblesKnight(piece)
+        elsif piece.type == 'bishop'
+            buildPossiblesDiags(piece)
         end
-
-
-
-
     end
 
     def refresh
