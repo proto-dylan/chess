@@ -351,8 +351,7 @@ class Board
     end
 
     def pawnAttack(piece, attack)       
-        current = piece.location
-        puts "attack #{attack}"    
+        current = piece.location 
         to_attack = @board_array[attack[0]][attack[1]]
         piece.location = attack
         row = attack[0]
@@ -393,8 +392,7 @@ class Board
         if attack == 1
             assignDead(to_attack)     
         end
-        @piece.attacking = @board.setAttacking(@piece)
-        puts "@piece.attacking: #{@piece.attacking}"
+       
     end
 
     def promotion(piece, move)
@@ -411,29 +409,20 @@ class Board
         case answer
 
             when 1
-                puts "choice 1"
                 promo = "#{color[0]}Q#{(@promotions-1)}"
-                puts "promo: #{promo}"
                 promotion = makePiece("queen", color, "\u265B", @@queen_moves)
-                puts "promotion #{promotion}"              
+              
             when 2
-                puts "choice 2"
                 promo = "#{color[0]}b#{(@promotions-1)}"
-                puts "promo: #{promo}"
                 promotion = makePiece("bishop", color, "\u265D", @@bishop_moves)
-                puts "promotion #{promotion}"
+
             when 3
-                puts "choice 3"
                 promo = "#{color[0]}r#{(@promotions-1)}"
-                puts "promo: #{promo}"
                 promotion = makePiece("rook", color, "\u265C", @@rook_moves)
-                puts "promotion #{promotion}"
+
             when 4
-                puts "choice 4"
                 promo = "#{color[0]}k#{(@promotions-1)}"
-                puts "promo: #{promo}"
                 promotion = makePiece("knight", color, "\u265E", @@knight_moves)
-                puts "promotion #{promotion}"
         end
 
         instance_variable_set("@#{promo}", promotion)
@@ -459,20 +448,19 @@ class Board
         end                                 # make sure its iterating over arrays, not integers!!
         return attack
     end
-    
+
     def buildPossiblesKnight(piece)
         moves = piece.moves
         loc = piece.location
-        moves.each do |move|
         attack = []
+        moves.each do |move|
             if (loc[0]+move[0]) > -1 && (loc[0]+move[0]) < 8
                 if  (loc[1]+move[1]) > -1 && (loc[1]+move[1]) < 8 
                     attack << [(loc[0]+move[0]),(loc[1]+move[1])]
                 end
             end
         end
-        return attack
-            
+        return attack     
     end
 
     def buildPossiblesDiags
@@ -486,7 +474,9 @@ class Board
     end
     
     def setAttacking(piece)
-        if piece.type == 'knight'
+        if piece.type == 'pawn'
+            return getPawnAttacking(piece.location, piece.color)
+        elsif piece.type == 'knight'
             return buildPossiblesKnight(piece)
         end
 

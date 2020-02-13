@@ -62,6 +62,7 @@ class Game
                         promo = @board.promotion(@piece, @move)
                         @piece = promo
                         @board.placePiece(@piece, @move)
+                        
                     when "attack promotion"
                         @piece = @board.promotion(@piece, @move)
                         @board.pawnAttack(@piece, @move)
@@ -74,9 +75,13 @@ class Game
                                 attack = 1
                                 @board.placePiece(@piece, @move, attack)
                                 @piece.move_counter += 1 
+                                #@piece.attacking = @board.setAttacking(@piece)
+                                #puts "@piece.attacking: #{@piece.attacking}"
                             when 0
                                 @board.placePiece(@piece, @move)
                                 @piece.move_counter += 1
+                                #@piece.attacking = @board.setAttacking(@piece)
+                                #puts "@piece.attacking: #{@piece.attacking}"
                             when -1
                                 @board.displayError(1)
                                 takeTurn(@player)
@@ -94,21 +99,24 @@ class Game
                             when 0               #place          
                                 @board.placePiece(@piece, @move)
                                 @piece.move_counter += 1 
-                                if @piece.type == 'pawn'
-                                    @piece.attacking = @board.getPawnAttacking(@piece.location, @piece.color)     #sets ATtacking for pawns new loc
-                                end
+                               # if @piece.type == 'pawn'
+                               #     @piece.attacking = @board.setAttacking(@piece) 
+                               #     puts "@piece.attacking: #{@piece.attacking}"   #sets ATtacking for pawns new loc
+                               # else
+                               #     @piece.attacking = @board.setAttacking(@piece)
+                               #     puts "@piece.attacking: #{@piece.attacking}"
+                               # end
 
                             when -1              #error
-                                valid = false
                                 @board.displayError(1)
                                 takeTurn(@player)
                             when 1      
                                 attack = 1
                                 @board.placePiece(@piece, @move, attack)
                                 @piece.move_counter += 1  
+                               
                         end
-                        
-                    when "invalid"
+                     when "invalid"
                         @board.displayError(1)
                         takeTurn(@player)
                 end
@@ -117,6 +125,9 @@ class Game
                 takeTurn(@player)
             end
         end
+        @piece.attacking = @board.setAttacking(@piece)                       #if the loops gets here, a piece has been played
+        puts "@piece.attacking: #{@piece.attacking}"                         #so always set attacking[]
+
     end
     
     def welcome
