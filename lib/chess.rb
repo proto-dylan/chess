@@ -58,16 +58,13 @@ class Game
 
     def takeTurn(player, valid=true)
         puts "Start take trun"
+        
         @board.refresh
         input = getInput(player)
         @piece = input[0]
         @move = input[1]
         piece_coords = input[2]
         move_coords = input[3]
-
-        puts "piece: #{@piece}, move #{@move}"
-        puts "piece_coords #{piece_coords}, move_coords #{move_coords}"
-        puts "piece attack before turn #{@piece.attacking}"
         travel = @board.getTravel(@move, @piece)
 
         if @piece.type == 'knight'
@@ -75,7 +72,7 @@ class Game
         else
             check_move = @board.checkMove(travel, @piece)
         end
-
+        puts "check move? #{check_move}"
         case check_move
             when "attack"
                 @board.pawnAttack(@piece, @move)
@@ -112,10 +109,8 @@ class Game
                 type = @piece.type
                 color = @piece.color
                 to_move = @board.checkPath(path, piece_coords, type, color)  
-                puts "to move: #{to_move}"
                 case to_move
-                    when 0
-                        puts "placepiece"               #place          
+                    when 0               #place          
                         @board.placePiece(@piece, @move)
                         @piece.move_counter += 1 
                     when -1              #error
@@ -126,12 +121,16 @@ class Game
                         @board.placePiece(@piece, @move, attack)
                         @piece.move_counter += 1            
                 end
-                puts "valid here? should be done #{to_move}"
             when "invalid"
                 @board.displayError(1)
                 takeTurn(@player)
         end
         @board.setAllAttacking
+        @piece.last_turn = @board.turn
+        puts "@turn #{@board.turn}"
+        @board.turn += 1
+        
+        
     end
     
     def welcome

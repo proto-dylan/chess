@@ -1,5 +1,5 @@
 class Board
-    attr_accessor :board_array, :black_dead, :white_dead, :promotions
+    attr_accessor :board_array, :black_dead, :white_dead, :promotions, :turn
     @@diagonals = [[-1,1],[1,1],[1,-1],[-1,-1]]
     @@cardinals = [[-1,0],[1,0],[0,-1],[0,1]]
     @@white_pawn_moves = [[-1,0],[-2,0]]
@@ -29,8 +29,8 @@ class Board
         #simplePrint
         @white_dead = []
         @black_dead = []
-        @promotions = 3                    #start count higher than any existing piece instance name
-        
+        @promotions = 3 
+        @turn = 0                   #start count higher than any existing piece instance name 
     end
 
     class Node        
@@ -42,14 +42,15 @@ class Board
             end  
     end
 
-    def makePiece(type, color, uni, moves=0, move_counter=0, attacking=[])
+    def makePiece(type, color, uni, moves=0, move_counter=0, attacking=[], last_turn=0)
       piece = Piece.new(
             type: type,
             color: color,
             uni: uni,
             moves: moves,
             move_counter: move_counter,
-            attacking: attacking
+            attacking: attacking,
+            last_turn: last_turn
         )
         return piece
     end
@@ -248,9 +249,16 @@ class Board
         adj = @board_array[current[0]][current[1]+travel[1]]
         if adj != 0 && adj.color != piece.color 
             if adj.type == 'pawn' 
-                if adj.move_counter == 1
-                    if adj.location[0] == 3 || adj.location[0]==4 
-                        return true
+                if (@turn - adj.last_turn) == 1
+                    puts "new test, #{@turn - adj.last_turn}"
+                    if adj.color == 'black'
+                        if adj.location[0] == 3
+                            return true
+                        end
+                    elsif adj.color == 'white'
+                        if adj.location[0] == 4
+                            return true
+                        end
                     end
                 end
             end
@@ -292,6 +300,8 @@ class Board
                                 return "attack"
                             end
                         end 
+                    else
+                        return "invalid"
                     end
                 end
             elsif piece.move_counter == 0
@@ -469,10 +479,7 @@ class Board
             8.times do
                 piece = @board_array[row][col]
                 if piece != 0
-                    attack = setAttacking(piece)
-                    puts "#{piece.type}, #{piece.color}," 
-                    puts "atacking #{attack}"
-                    puts "\n\n"  
+                    attack = setAttacking(piece) 
                     if attack != nil
                         piece.attacking << attack
                     end
