@@ -30,7 +30,8 @@ class Board
         @white_dead = []
         @black_dead = []
         @promotions = 3 
-        @turn = 0                   #start count higher than any existing piece instance name 
+        @turn = 0 
+                          #start count higher than any existing piece instance name 
     end
 
     class Node        
@@ -176,19 +177,26 @@ class Board
         return path
     end
 
-    def checkPath(path, piece_coords, type, color)
+    def checkPath(path, piece_coords, color)
         to_move = 0                         #  -1 means no place, 0 means place, 1 means attack
         if path[0].instance_of?(Array)       #Must check if its a nested array before iteration!
-            path.each do |path_move|               
+            path.each do |path_move|
+                puts "inside check path: each path #{path_move}"               
                 if @board_array[path_move[0]][path_move[1]] != 0
                     if path_move == path.last
+                        puts "last path? #{path.last}"
+
                         if @board_array[path_move[0]][path_move[1]].color != color  
                             to_move = 1 
+                        else
+                            to_move = -1
+                            return to_move
                         end
                     else                                    #check if the piece is enemy
                         to_move = -1
                         return to_move
                     end
+
                 end
             end
         else                                                    #if its just an array of two coords, [x,y]
@@ -318,9 +326,61 @@ class Board
                     return "invalid"
                 end
             end
+        elsif piece.type == 'king'
+            if travel[1] == -2 || travel[1] == 2
+                return checkCastling(piece, travel[1]) ? "castle" : "invalid"
+            end
         else
             return piece.moves.include?(travel) ? "valid" : "invalid"
         end
+    end
+    def checkCastling(piece, travel_col)
+        travel_col
+        king = piece
+        color = king.color
+        loc = king.location
+        castle = false
+        if king.move_counter == 0 
+            if color == 'black'
+                row = 0
+            else
+                row = 7
+            end
+            if travel_col == -2                        
+                rook = @board_array[travel_row][0] 
+                col_to_check = [1,2,3] 
+                castle_col = [2,3]            #  column for final move , king first then rook
+            elsif travel_col == 2
+                rook = @board_array[travel_row][7]
+                col_to_check = [5,6]
+                castle_col = [6,5]             # col for king then rook
+            end 
+            if rook.type == 'rook' && rook.move_counter ==0
+                check_path = []
+                col_to_check.each do |col|
+                    check_path << [row,col]
+                end
+                if checkPath(check_path, loc, color) == 0
+                    king.castle = [[castle_col[0],travel_row],[castle_col[1],travel_row],rook.location,king.location]
+                    return 'castle'
+                end
+            end
+        end
+        return 'invalid'
+    end
+
+    def placeCastle(piece, move)
+        rook = piece.castle[2]
+        king = piece.castle[3]
+        king_move = piece.castle[0]
+        rook_move = piece.castle[1]
+
+        puts "Castle king: #{castle_king}, move: #{king_move}"
+        puts "Castle rook: #{castle_rook}, move: #{rook_move}"
+
+        placePiece(king, king_move)
+        placePiece(rook, rook_move)
+
     end
 
     def pawnAttack(piece, attack)       
@@ -508,8 +568,9 @@ class Board
     end
 
     def refresh
-        puts "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
-        #simplePrint    
+        puts "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+        #simplePrint 
+        displayDead   
         display        
     end 
 
@@ -552,9 +613,22 @@ class Board
         puts "               a b c d e f g h"
         puts "\n\n" 
     end
+
+    def displayDead
+        puts "                  captured "
+        puts
+        print "                  "
+        print "black:  "
+        @black_dead.flatten.each { |x| print "#{x}".black.on_light_blue} 
+        puts ""   
+        print "                  "
+        print "white:  "
+        @white_dead.flatten.each { |x| print "#{x}".white.on_light_black}
+        puts "\n" 
+    end
     
     def display
-        puts "\n\n\n"
+        puts "\n\n"
         puts "              a b c d e f g h  "
         counter = 8
         toggle = 0
@@ -605,9 +679,6 @@ class Board
         end         
         puts "              a b c d e f g h  "
         puts "\n\n"
-        puts "DEATH TALLY: "
-        puts " BLACK:  #{@black_dead}"
-        puts " WHITE:  #{@white_dead}"
-        puts "\n\n\n"
+        
     end
 end

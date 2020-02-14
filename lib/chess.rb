@@ -72,8 +72,10 @@ class Game
         else
             check_move = @board.checkMove(travel, @piece)
         end
-        puts "check move? #{check_move}"
+        puts "check move? #{check_move}"                      #checks if move is within moves allowed
         case check_move
+            when "castle"
+                @board.placeCastle(@piece, @move)
             when "attack"
                 @board.pawnAttack(@piece, @move)
             when "promotion"
@@ -108,7 +110,9 @@ class Game
                 path = @board.buildPath(piece_coords, @move, travel)
                 type = @piece.type
                 color = @piece.color
-                to_move = @board.checkPath(path, piece_coords, type, color)  
+                puts "path: #{path}"
+                to_move = @board.checkPath(path, piece_coords, color)
+                puts "to move: #{to_move}"  
                 case to_move
                     when 0               #place          
                         @board.placePiece(@piece, @move)
