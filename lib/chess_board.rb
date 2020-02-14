@@ -242,8 +242,14 @@ class Board
 
     def getMove(player)
         puts "#{player} move: "
-        input = gets.chomp    
-        if input.match(/[a-h][1-8][\s](\w*to\w*)[\s][a-h][1-8]/)
+        input = gets.chomp  
+        if input == "save"
+            return "save"
+        elsif input == "load"
+            return "load"
+        elsif input == "reset"
+            return "reset"
+        elsif input.match(/[a-h][1-8][\s](\w*to\w*)[\s][a-h][1-8]/)
             input = input.split('to')
             @piece = input[0].rstrip
             @move = input[1].strip
@@ -399,7 +405,7 @@ class Board
         @board_array[current[0]][current[1]] = 0
         @board_array[row][col] = piece
         piece.move_counter += 1
-        refresh       
+ 
         assignDead(to_attack)      
     end
 
@@ -429,14 +435,12 @@ class Board
         to_attack = @board_array[row][col]
         @board_array[current[0]][current[1]] = 0
         @board_array[row][col] = piece
-        refresh
         if attack == 1
             assignDead(to_attack)     
         end      
     end
 
     def promotion(piece, move)
-        refresh
         color = piece.color
         loc = piece.location
         puts "Choose Promotion: "
@@ -579,7 +583,7 @@ class Board
         puts "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
         #simplePrint 
         displayDead   
-        display        
+        displayBoard        
     end 
 
     def displayError(switch)
@@ -593,6 +597,21 @@ class Board
             puts "Error, wrong color move"
         end
         sleep(1.3)
+        puts "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+        refresh
+    end
+
+    def displayMessage(switch)
+        puts "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+        case switch
+        when 1
+            puts "Game saving..."
+        when 2
+            puts "Game loading..."
+        when 3
+            puts "Board resetting..."
+        end
+        sleep(1)
         puts "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
         refresh
     end
@@ -635,7 +654,7 @@ class Board
         puts "\n" 
     end
     
-    def display
+    def displayBoard
         puts "\n\n"
         puts "              a b c d e f g h  "
         counter = 8
