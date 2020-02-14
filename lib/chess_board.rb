@@ -1,5 +1,5 @@
 class Board
-    attr_accessor :board_array, :black_dead, :white_dead, :promotions, :turn
+    attr_accessor :board_array, :black_dead, :white_dead, :promotions, :turn, :castle
     @@diagonals = [[-1,1],[1,1],[1,-1],[-1,-1]]
     @@cardinals = [[-1,0],[1,0],[0,-1],[0,1]]
     @@white_pawn_moves = [[-1,0],[-2,0]]
@@ -31,6 +31,7 @@ class Board
         @black_dead = []
         @promotions = 3 
         @turn = 0 
+        @castle = []
                           #start count higher than any existing piece instance name 
     end
 
@@ -108,7 +109,7 @@ class Board
                 [0,0,0,0,0,0,0,0],
                 [0,0,0,0,0,0,0,0],
                 [@wp1,@wp2,@wp3,@wp4,@wp5,@wp6,@wp7,@wp8],
-                [@wr1,@wk1,@wb1,@wKk,@wQq,@wb2,@wk2,@wr2]
+                [@wr1,@wk1,@wb1,@wQq,@wKk,@wb2,@wk2,@wr2]
             ]   
         else
             @board_array = array
@@ -329,12 +330,15 @@ class Board
         elsif piece.type == 'king'
             if travel[1] == -2 || travel[1] == 2
                 return checkCastling(piece, travel[1]) ? "castle" : "invalid"
+            else
+                return "invalid"
             end
         else
             return piece.moves.include?(travel) ? "valid" : "invalid"
         end
     end
     def checkCastling(piece, travel_col)
+        puts "CASTLE CHECK"
         travel_col
         king = piece
         color = king.color
@@ -347,11 +351,11 @@ class Board
                 row = 7
             end
             if travel_col == -2                        
-                rook = @board_array[travel_row][0] 
+                rook = @board_array[row][0] 
                 col_to_check = [1,2,3] 
                 castle_col = [2,3]            #  column for final move , king first then rook
             elsif travel_col == 2
-                rook = @board_array[travel_row][7]
+                rook = @board_array[row][7]
                 col_to_check = [5,6]
                 castle_col = [6,5]             # col for king then rook
             end 
@@ -361,7 +365,8 @@ class Board
                     check_path << [row,col]
                 end
                 if checkPath(check_path, loc, color) == 0
-                    king.castle = [[castle_col[0],travel_row],[castle_col[1],travel_row],rook.location,king.location]
+                    @castle = [[row,castle_col[0]],[row,castle_col[1]],[rook.location],[king.location]]
+                    puts "Rturn castle"
                     return 'castle'
                 end
             end
@@ -370,13 +375,15 @@ class Board
     end
 
     def placeCastle(piece, move)
-        rook = piece.castle[2]
-        king = piece.castle[3]
-        king_move = piece.castle[0]
-        rook_move = piece.castle[1]
+        rook_array = @castle[2].flatten
+        king_array = @castle[3].flatten
+        rook = @board_array[rook_array[0]][rook_array[1]]
+        king = @board_array[king_array[0]][king_array[1]]
+        king_move = @castle[0].flatten
+        rook_move = @castle[1].flatten
 
-        puts "Castle king: #{castle_king}, move: #{king_move}"
-        puts "Castle rook: #{castle_rook}, move: #{rook_move}"
+        puts "Castle king: #{king}, move: #{king_move}, king? #{king.type}"
+        puts "Castle rook: #{rook}, move: #{rook_move}, rook? #{rook.type}"
 
         placePiece(king, king_move)
         placePiece(rook, rook_move)
@@ -414,6 +421,7 @@ class Board
     end
 
     def placePiece(piece, move, attack=0)
+        puts "placeing #{piece.type}, at #{move}"
         current = piece.location
         piece.location = move        
         row = move[0]
