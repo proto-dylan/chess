@@ -9,7 +9,7 @@ class Game
         @board = Board.new
         @win = false
         @player = "white"
-        welcome
+        #welcome
         @board.refresh
         play
     end
@@ -80,7 +80,8 @@ class Game
         return piece, move, piece_coords, move_coords
     end
 
-    def takeTurn(player, valid=true)      
+    def takeTurn(player, valid=true)  
+        @board.setAllAttacking
         input = getInput(player)       
         if input == "load"
             load_game  
@@ -161,6 +162,7 @@ class Game
             @board.setAllAttacking
             @piece.last_turn = @board.turn
             @board.turn += 1
+            @board.checkCheck
             @board.refresh
         end
         

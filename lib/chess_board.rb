@@ -1,5 +1,5 @@
 class Board
-    attr_accessor :board_array, :black_dead, :white_dead, :promotions, :turn, :castle
+    attr_accessor :board_array, :black_dead, :white_dead, :promotions, :turn, :castle, :all_attacking, :black_in_check, :white_in_check
     @@diagonals = [[-1,1],[1,1],[1,-1],[-1,-1]]
     @@cardinals = [[-1,0],[1,0],[0,-1],[0,1]]
     @@white_pawn_moves = [[-1,0],[-2,0]]
@@ -29,10 +29,13 @@ class Board
         #simplePrint
         @white_dead = []
         @black_dead = []
-        @promotions = 3 
+        @promotions = 3          #start count higher than any existing piece instance name 
         @turn = 0 
         @castle = []
-                          #start count higher than any existing piece instance name 
+        @all_attacking = []
+        @white_in_check = false 
+        @black_in_check = false
+                         
     end
 
     class Node        
@@ -231,6 +234,8 @@ class Board
         end
     end
 
+   
+    
     def convertCoords(coords)
         array = coords.split(//)
         temp = [] 
@@ -343,6 +348,7 @@ class Board
             return piece.moves.include?(travel) ? "valid" : "invalid"
         end
     end
+
     def checkCastling(piece, travel_col)
         puts "CASTLE CHECK"
         travel_col
@@ -469,84 +475,23 @@ class Board
 
     end
     
-    def getPawnAttacking(loc, color) 
-        attack = []
-        col = loc[1]
-        if color == 'white'
-            row = ((loc[0]) - 1)
-        else
-            row = ((loc[0]) + 1)
-        end
-        cols =[col+1, col +-1]                   #if black pawn, add one to row for diag attack, -1 for white
-        cols.each do |col| 
-            if col > -1 && col < 9 
-                attack << [row, col]
-            end
-        end                                 # make sure its iterating over arrays, not integers!!
-        return attack
-    end
-
-    def buildPossiblesKnight(piece)
-        moves = piece.moves
-        loc = piece.location
-        attack = []
-        moves.each do |move|
-            if (loc[0]+move[0]) > -1 && (loc[0]+move[0]) < 8
-                if  (loc[1]+move[1]) > -1 && (loc[1]+move[1]) < 8 
-                    attack << [(loc[0]+move[0]),(loc[1]+move[1])]
-                end
-            end
-        end
-        return attack     
-    end
-
+   
+   
     def is_valid_move?(move)        
         return (move[0] > -1) && (move[0] < 8) && (move[1] > -1) && (move[1] < 8) ? true : false
     end
     
-    def recursiveCheck(loc,bump)
-        temp = loc
-        temp =[(temp[0]+bump[0]),(temp[1]+bump[1])]
-        if is_valid_move?(temp)
-            if @board_array[temp[0]][temp[1]] == 0 
-                rec_temp = [(temp[0]+bump[0]),(temp[1]+bump[1])]
-                if is_valid_move?(rec_temp)
-                    recursiveCheck(temp, bump)
-                else
-                    return temp
-                end
-            end
-        else
-            return temp
-        end
-    end
 
-    def buildPossibles(piece, array)
-        loc = piece.location
-        attack = [] 
-        array.each do |coord|
-            temp_attack = recursiveCheck(loc, coord)
-            if temp_attack != nil
-                attack << temp_attack
-            end
-        end
-        return attack
-    end
-
-    def getKingAttacking(piece)
-        array = (@@diagonals+@@cardinals)
-        attack = []
-        array.each do |coord|
-            if is_valid_move?(coord)
-                attack << coord
-            end
-        end
-        return attack 
+    def checkCheck
+        #setAllAttacking   #already called at the end of turn
+        puts "CHECKCHECk"
+        puts "@all_attacking: #{@all_attacking.flatten(1)}"
     end
 
     def setAllAttacking
         col=0
         row=0
+        @all_attacking = []
         8.times do
             8.times do
                 piece = @board_array[row][col]
@@ -554,6 +499,8 @@ class Board
                     attack = setAttacking(piece) 
                     if attack != nil
                         piece.attacking << attack
+                        @all_attacking << attack
+                        puts "color: #{piece.color}, piece: #{piece.type} attacking: #{piece.attacking}"
                     end
                 end
                 col +=1
@@ -562,21 +509,146 @@ class Board
             row +=1            
         end
     end
-    
+
+   
     def setAttacking(piece)
+        piece.attacking = []
+        to_attack = []
+     
         if piece.type == 'pawn'
-            return getPawnAttacking(piece.location, piece.color)
+            to_attack = getPawnAttacking(piece.location, piece.color)
         elsif piece.type == 'knight'
-            return buildPossiblesKnight(piece)
+            to_attack = buildPossiblesKnight(piece)
         elsif piece.type == 'bishop'
-            return buildPossibles(piece, @@diagonals)
+            to_attack = buildPossibles(piece, @@diagonals)
         elsif piece.type == 'rook'
-            return buildPossibles(piece, @@cardinals)
+            to_attack = buildPossibles(piece, @@cardinals)
         elsif piece.type == 'queen'
-            return ((buildPossibles(piece, @@diagonals))+(buildPossibles(piece, @@cardinals)))
+            to_attack = ((buildPossibles(piece, @@diagonals))+(buildPossibles(piece, @@cardinals)))
         elsif piece.type == 'king'
-            return getKingAttacking(piece)
+            to_attack = getKingAttacking(piece)
         end
+        
+        return to_attack
+
+    end
+
+    def getKingAttacking(piece)
+        array = (@@diagonals+@@cardinals)
+        loc = piece.location
+        attack = []
+        array.each do |coord| 
+            row = coord[0] + loc[0]
+            col = coord[1] + loc[1]
+            if is_valid_move?([row,col])
+                temp_piece = @board_array[row][col]
+                if temp_piece != 0  
+                    if temp_piece.color != piece.color
+                        attack << [row, col]
+                    end
+                elsif temp_piece == 0 
+                    attack << [row, col]
+                end
+            end
+        end   
+        return attack 
+    end
+    
+    def getPawnAttacking(loc, color) 
+        attack = []
+        col = loc[1]
+        if color == 'white'
+            row = ((loc[0]) - 1)                    #if black pawn, add one to row for diag attack, -1 for white
+        else
+            row = ((loc[0]) + 1)
+        end
+        cols =[col+1, col +-1]                   
+        cols.each do |col| 
+            if is_valid_move?([row,col])
+                temp_piece = @board_array[row][col]
+                if temp_piece != nil
+                    if temp_piece != 0  
+                        if temp_piece.color != color
+                            attack << [row, col]
+                        end
+                    elsif temp_piece == 0 
+                        attack << [row, col]
+                    end
+                end
+            end
+        end                                 # make sure its iterating over arrays, not integers!!
+        return attack
+    end
+
+    def buildPossibles(piece, array)
+        loc = piece.location
+        color = piece.color
+        attack = [] 
+        array.each do |coord|
+            temp_attack = recursiveCheck(loc, coord, color)
+            if temp_attack != nil && temp_attack != loc
+                puts "#{piece.type} #{piece.color} TEMP ATTACK: #{temp_attack}"
+                temp_piece = @board_array[temp_attack[0]][temp_attack[1]]
+                if temp_piece != 0
+                    if temp_piece.color != color
+                        attack << temp_attack
+                    end
+                else
+                    attack << temp_attack
+                end
+            end
+        end
+        return attack
+    end
+
+    def recursiveCheck(loc, bump, color)
+        current = loc
+        temp =[(current[0]+bump[0]),(current[1]+bump[1])]
+        temp2 = [(temp[0]+bump[0]),(temp[1]+bump[1])]
+       # puts "recur temp: #{temp}"
+        #puts "recur temp2: #{temp2}"
+
+        if is_valid_move?(temp)
+            temp_piece = @board_array[temp[0]][temp[1]]
+            if temp_piece == 0 
+                if is_valid_move?(temp2)
+                    recursiveCheck(temp, bump, color)
+                else
+                  #  puts "return temp: #{temp}"
+                    return temp
+                end
+            elsif temp_piece.color != color
+               # puts "second return temp: #{temp}"
+                return temp
+            else 
+               # puts "return current #{current}"
+                return current
+            end
+        else
+           # puts "last return current #{current}"
+            return current
+        end
+    end
+
+    def buildPossiblesKnight(piece)
+        moves = piece.moves
+        loc = piece.location
+        attack = []
+        moves.each do |move|
+            row = loc[0]+move[0]
+            col = loc[1]+move[1]
+            if is_valid_move?([row,col])
+                temp_piece = @board_array[row][col]
+                if temp_piece != 0
+                    if temp_piece.color != piece.color
+                        attack << [row, col]
+                    end
+                else
+                    attack << [row, col]
+                end
+            end
+        end
+        return attack     
     end
 
     def refresh
