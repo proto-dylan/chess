@@ -337,7 +337,11 @@ class Board
             if travel[1] == -2 || travel[1] == 2
                 return checkCastling(piece, travel[1]) ? "castle" : "invalid"
             elsif piece.moves.include?(travel)
-                temp_attacking = setAllAttacking(piece.color)                           
+                if piece.color == 'black'
+                    temp_attacking = @white_attacking
+                elsif piece.color == 'white'
+                    temp_attacking = @black_attacking
+                end
                 puts "temp attacking: #{temp_attacking},"
                 puts "move? #{move}"
                 if temp_attacking.include?(move) 
@@ -479,12 +483,16 @@ class Board
         row=0
         8.times do
             8.times do
-                piece = @board_array[row][col]
-                if piece !=0 
+                if @board_array[row][col] != 0
+                    piece = @board_array[row][col]
                     if piece.type == 'king' && piece.color == color        
                         loc = piece.location
-                        king_attacking = setAllAttacking(color)
-                        puts "#{color} attacking!!! #{king_attacking}"
+                        if color == 'black'
+                            king_attacking = @white_attacking               #assign oppisite side as the attacking array
+                        elsif color == 'white'
+                            king_attacking = @black_attacking
+                        end
+                       # puts "#{color} attacking(being attacked)!!! #{king_attacking}"
                         if king_attacking.include?(loc)
                             return true
                         end
@@ -498,11 +506,10 @@ class Board
         return false
     end
 
-    def setAllAttacking(exclude=nil, color=nil)         #piece to exclude in attack tally (coords)
+    def setAllAttacking         #piece to exclude in attack tally (coords)
         col=0
         row=0
 
-        puts "setAllAtt color #{color}"
         @all_attacking = []
         @black_attacking = []
         @white_attacking = []
@@ -534,7 +541,7 @@ class Board
         @black_attacking.flatten!(1)
         @white_attacking.flatten!(1)
 
-        puts "all attacking #{@all_attacking}"
+        #puts "all attacking #{@all_attacking}"
         puts "black attack #{@black_attacking}"
         puts "white attack #{@white_attacking}"
     end

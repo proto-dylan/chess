@@ -177,15 +177,19 @@ class Game
                     @board.displayError(1)
                     takeTurn(@player)
             end
+           
+            
+            @board.setAllAttacking
+
             still_in_check = @board.checkCheck(player)
             if still_in_check == true
                 puts "STill in check"
                 @board.displayError(6)
-                load_game(player)
+                load_game(in_check)
+                @board.refresh
                 takeTurn(@player)
             end
-            
-            @board.setAllAttacking
+
             @piece.last_turn = @board.turn
             @board.turn += 1
             #@board.checkCheck(player)
