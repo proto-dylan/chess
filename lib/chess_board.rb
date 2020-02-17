@@ -1,5 +1,5 @@
 class Board
-    attr_accessor :board_array, :black_dead, :white_dead, :promotions, :turn, :castle, :all_attacking, :black_in_check, :white_in_check
+    attr_accessor :board_array, :black_dead, :white_dead, :promotions, :turn, :castle, :all_attacking, :black_attacking, :white_attacking
     @@diagonals = [[-1,1],[1,1],[1,-1],[-1,-1]]
     @@cardinals = [[-1,0],[1,0],[0,-1],[0,1]]
     @@white_pawn_moves = [[-1,0],[-2,0]]
@@ -33,8 +33,8 @@ class Board
         @turn = 0 
         @castle = []
         @all_attacking = []
-        @white_in_check = false 
-        @black_in_check = false
+        @black_attacking = []
+        @white_attacking = []
                          
     end
 
@@ -492,14 +492,23 @@ class Board
         col=0
         row=0
         @all_attacking = []
+        @black_attacking = []
+        @white_attacking = []
         8.times do
             8.times do
                 piece = @board_array[row][col]
                 if piece != 0
                     attack = setAttacking(piece) 
                     if attack != nil
+                        
                         piece.attacking << attack
                         @all_attacking << attack
+
+                        if piece.color == 'black'
+                            @black_attacking << attack
+                        elsif piece.color == 'white'
+                            @white_attacking << attack
+                        end
                         puts "color: #{piece.color}, piece: #{piece.type} attacking: #{piece.attacking}"
                     end
                 end
@@ -508,6 +517,14 @@ class Board
             col = 0
             row +=1            
         end
+
+        @all_attacking.flatten!(1)
+        @black_attacking.flatten!(1)
+        @white_attacking.flatten!(1)
+
+        puts "all attacking #{@all_attacking}"
+        puts "black attack #{@black_attacking}"
+        puts "white attack #{@white_attacking}"
     end
 
    
