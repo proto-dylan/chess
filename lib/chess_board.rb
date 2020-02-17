@@ -185,11 +185,8 @@ class Board
         to_move = 0                         #  -1 means no place, 0 means place, 1 means attack
         if path[0].instance_of?(Array)       #Must check if its a nested array before iteration!
             path.each do |path_move|
-                puts "inside check path: each path #{path_move}"               
                 if @board_array[path_move[0]][path_move[1]] != 0
                     if path_move == path.last
-                        puts "last path? #{path.last}"
-
                         if @board_array[path_move[0]][path_move[1]].color != color  
                             to_move = 1 
                         else
@@ -200,7 +197,6 @@ class Board
                         to_move = -1
                         return to_move
                     end
-
                 end
             end
         else                                                    #if its just an array of two coords, [x,y]
@@ -299,7 +295,7 @@ class Board
         assignDead(dead)       
     end
 
-    def checkMove(travel, piece)
+    def checkMove(travel, piece, move = nil)
         if piece.type == 'pawn'
             loc = piece.location
             if piece.color == 'black' 
@@ -341,9 +337,15 @@ class Board
         elsif piece.type == 'king'
             if travel[1] == -2 || travel[1] == 2
                 return checkCastling(piece, travel[1]) ? "castle" : "invalid"
-            else
-                return "invalid"
+            elsif piece.moves.include?(travel)
+                if @all_attacking.include?(move) 
+                    return "check"
+                else
+
+                    return "valid"
+                end
             end
+
         else
             return piece.moves.include?(travel) ? "valid" : "invalid"
         end
@@ -482,25 +484,47 @@ class Board
     end
     
 
-    def checkCheck
-        #setAllAttacking   #already called at the end of turn
-        puts "CHECKCHECk"
-        puts "@all_attacking: #{@all_attacking.flatten(1)}"
+    def checkCheck(color)
+        col=0
+        row=0
+        8.times do
+            8.times do
+                piece = @board_array[row][col]
+                if piece !=0 
+                    if piece.type == 'king' && piece.color == color
+                        puts "CHeck KING"        
+                        loc = piece.location
+                        puts "king loc= #{loc}"
+                        puts "all ATTACK: #{@all_attacking}"
+                        king_attacking = setAllAttacking(loc)
+                        puts "king_attacking #{king_attacking}"
+                        if @all_attacking.include?(loc)
+                            return true
+                        end
+                    end
+                end
+                col +=1 
+            end
+            col = 0
+            row +=1
+        end
+        return false
     end
 
-    def setAllAttacking
+    def setAllAttacking(exclude=nil)
         col=0
         row=0
         @all_attacking = []
         8.times do
             8.times do
-                piece = @board_array[row][col]
-                if piece != 0
-                    attack = setAttacking(piece) 
-                    if attack != nil
-                        piece.attacking << attack
-                        @all_attacking << attack
-                        puts "color: #{piece.color}, piece: #{piece.type} attacking: #{piece.attacking}"
+                if [row,col] != exclude
+                    piece = @board_array[row][col]
+                    if piece != 0
+                        attack = setAttacking(piece) 
+                        if attack != nil
+                            piece.attacking << attack
+                            @all_attacking << attack
+                        end
                     end
                 end
                 col +=1
@@ -508,6 +532,7 @@ class Board
             col = 0
             row +=1            
         end
+        @all_attacking.flatten!(1)
     end
 
    
@@ -667,6 +692,12 @@ class Board
             puts "Error, piece blocked"
         when 3
             puts "Error, wrong color move"
+        when 4
+            puts "Error, can't move king into check"
+        when 5
+            puts "Error, must move king out of check"
+        when 6
+            puts "Error, can't leave king in check"
         end
         sleep(1.3)
         puts "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"

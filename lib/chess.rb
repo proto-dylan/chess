@@ -14,17 +14,30 @@ class Game
         play
     end
      
-    def load_game
-        loaded_game = File.read("SavedGames/save_game.yaml")
+    def load_game(player=nil)
+        if player == nil
+            loaded_game = File.read("SavedGames/save_game.yaml")
+        else
+            loaded_game = File.read("TempFiles/#{player}.yaml")
+        end
         game = YAML.load(loaded_game)
-        @player = game[:player]
+        if player != nil
+            @player = player
+        else
+            @player = game[:player]
+        end
         @board = game[:board]
         @win = game[:win]
     end
 
-    def save_game
+    def save_game(player=nil)
         Dir.mkdir("SavedGames") unless Dir.exists?("SavedGames")
-        filename = "SavedGames/save_game.yaml"
+        if player == nil
+            filename = "SavedGames/save_game.yaml"
+        else
+            Dir.mkdir("TempFiles") unless Dir.exists?("TempFiles")
+            filename = "TempFiles/#{player}.yaml"
+        end
         hash = { :player => @player, :board => @board, :win => @win}  
         dump = YAML::dump(hash)
         File.open(filename, 'w') do |file|
@@ -37,16 +50,14 @@ class Game
         until @win do     
             takeTurn(@player) 
             if @player == 'black' && @win != true
-                puts "switch to white"
                 @player = 'white' 
-
             elsif @player == 'white' && @win != true
-        
-                puts "switch to black"
                 @player = 'black'
             end
+            
         end
     end
+
     def getInput(player)
         check = false
         until check == true do
@@ -82,7 +93,13 @@ class Game
 
     def takeTurn(player, valid=true)  
         @board.setAllAttacking
-        input = getInput(player)       
+        in_check = @board.checkCheck(player)
+        if in_check == true
+            puts "IN CHECK"
+            save_game(player)
+        end
+        input = getInput(player)
+            
         if input == "load"
             load_game  
             player = @player
@@ -101,12 +118,17 @@ class Game
             piece_coords = input[2]
             move_coords = input[3]
             travel = @board.getTravel(@move, @piece)
+
             if @piece.type == 'knight'
                 check_move = "knight"
             else
-                check_move = @board.checkMove(travel, @piece)            #checks if move is within moves allowed
-            end                     
+                check_move = @board.checkMove(travel, @piece, @move)            #checks if move is within moves allowed
+            end 
+
             case check_move
+                when "check"
+                    @board.displayError(4)
+                    takeTurn(@player)
                 when "castle"
                     @board.placeCastle(@piece, @move)
                 when "attack"
@@ -159,10 +181,17 @@ class Game
                     @board.displayError(1)
                     takeTurn(@player)
             end
+            still_in_check = @board.checkCheck(@player)
+            if still_in_check == true
+                puts "STill in check"
+                @board.displayError(6)
+                load_game(@player)
+            end
+            
             @board.setAllAttacking
             @piece.last_turn = @board.turn
             @board.turn += 1
-            @board.checkCheck
+            #@board.checkCheck(player)
             @board.refresh
         end
         
