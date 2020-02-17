@@ -14,29 +14,25 @@ class Game
         play
     end
      
-    def load_game(player=nil)
-        if player == nil
+    def load_game(loaded_game=nil)
+        if loaded_game == nil
             loaded_game = File.read("SavedGames/save_game.yaml")
         else
-            loaded_game = File.read("TempFiles/#{player}.yaml")
+            loaded_game = File.read("TempFiles/temp.yaml")
         end
         game = YAML.load(loaded_game)
-        if player != nil
-            @player = player
-        else
-            @player = game[:player]
-        end
+        @player = game[:player]
         @board = game[:board]
         @win = game[:win]
     end
 
-    def save_game(player=nil)
+    def save_game(filename=nil)
         Dir.mkdir("SavedGames") unless Dir.exists?("SavedGames")
-        if player == nil
+        if filename == nil
             filename = "SavedGames/save_game.yaml"
         else
             Dir.mkdir("TempFiles") unless Dir.exists?("TempFiles")
-            filename = "TempFiles/#{player}.yaml"
+            filename = "TempFiles/temp.yaml"
         end
         hash = { :player => @player, :board => @board, :win => @win}  
         dump = YAML::dump(hash)
@@ -96,7 +92,7 @@ class Game
         in_check = @board.checkCheck(player)
         if in_check == true
             puts "IN CHECK"
-            save_game(player)
+            save_game(in_check)
         end
         input = getInput(player)
             
@@ -181,11 +177,12 @@ class Game
                     @board.displayError(1)
                     takeTurn(@player)
             end
-            still_in_check = @board.checkCheck(@player)
+            still_in_check = @board.checkCheck(player)
             if still_in_check == true
                 puts "STill in check"
                 @board.displayError(6)
-                load_game(@player)
+                load_game(player)
+                takeTurn(@player)
             end
             
             @board.setAllAttacking

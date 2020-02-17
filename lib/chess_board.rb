@@ -266,7 +266,6 @@ class Board
         if adj != 0 && adj.color != piece.color 
             if adj.type == 'pawn' 
                 if (@turn - adj.last_turn) == 1
-                    puts "new test, #{@turn - adj.last_turn}"
                     if adj.color == 'black'
                         if adj.location[0] == 3
                             return true
@@ -338,21 +337,21 @@ class Board
             if travel[1] == -2 || travel[1] == 2
                 return checkCastling(piece, travel[1]) ? "castle" : "invalid"
             elsif piece.moves.include?(travel)
-                if @all_attacking.include?(move) 
+                temp_attacking = setAllAttacking(piece.color)                           
+                puts "temp attacking: #{temp_attacking},"
+                puts "move? #{move}"
+                if temp_attacking.include?(move) 
                     return "check"
                 else
-
                     return "valid"
                 end
             end
-
         else
             return piece.moves.include?(travel) ? "valid" : "invalid"
         end
     end
 
     def checkCastling(piece, travel_col)
-        puts "CASTLE CHECK"
         travel_col
         king = piece
         color = king.color
@@ -380,7 +379,6 @@ class Board
                 end
                 if checkPath(check_path, loc, color) == 0
                     @castle = [[row,castle_col[0]],[row,castle_col[1]],[rook.location],[king.location]]
-                    puts "Rturn castle"
                     return 'castle'
                 end
             end
@@ -395,13 +393,8 @@ class Board
         king = @board_array[king_array[0]][king_array[1]]
         king_move = @castle[0].flatten
         rook_move = @castle[1].flatten
-
-        puts "Castle king: #{king}, move: #{king_move}, king? #{king.type}"
-        puts "Castle rook: #{rook}, move: #{rook_move}, rook? #{rook.type}"
-
         placePiece(king, king_move)
         placePiece(rook, rook_move)
-
     end
 
     def pawnAttack(piece, attack)       
@@ -413,7 +406,6 @@ class Board
         @board_array[current[0]][current[1]] = 0
         @board_array[row][col] = piece
         piece.move_counter += 1
- 
         assignDead(to_attack)      
     end
 
@@ -435,7 +427,6 @@ class Board
     end
 
     def placePiece(piece, move, attack=0)
-        puts "placeing #{piece.type}, at #{move}"
         current = piece.location
         piece.location = move        
         row = move[0]
@@ -474,7 +465,6 @@ class Board
         instance_variable_set("@#{promo}", promotion)
         promotion.location = loc   
         return promotion
-
     end
     
    
@@ -491,14 +481,11 @@ class Board
             8.times do
                 piece = @board_array[row][col]
                 if piece !=0 
-                    if piece.type == 'king' && piece.color == color
-                        puts "CHeck KING"        
+                    if piece.type == 'king' && piece.color == color        
                         loc = piece.location
-                        puts "king loc= #{loc}"
-                        puts "all ATTACK: #{@all_attacking}"
-                        king_attacking = setAllAttacking(loc)
-                        puts "king_attacking #{king_attacking}"
-                        if @all_attacking.include?(loc)
+                        king_attacking = setAllAttacking(color)
+                        puts "#{color} attacking!!! #{king_attacking}"
+                        if king_attacking.include?(loc)
                             return true
                         end
                     end
@@ -511,10 +498,13 @@ class Board
         return false
     end
 
-    def setAllAttacking(exclude=nil)
+    def setAllAttacking(exclude=nil, color=nil)         #piece to exclude in attack tally (coords)
         col=0
         row=0
+
+        puts "setAllAtt color #{color}"
         @all_attacking = []
+        temp_attacking = []
         8.times do
             8.times do
                 if [row,col] != exclude
@@ -522,6 +512,10 @@ class Board
                     if piece != 0
                         attack = setAttacking(piece) 
                         if attack != nil
+                            if piece.color == color   
+                                puts "color attack: #{attack}"          #make temp array of enemy attaking
+                                temp_attacking << attack
+                            end
                             piece.attacking << attack
                             @all_attacking << attack
                         end
@@ -532,14 +526,17 @@ class Board
             col = 0
             row +=1            
         end
-        @all_attacking.flatten!(1)
+        if color == nil
+            return @all_attacking.flatten!(1)  
+        else
+            return temp_attacking.flatten!(1)
+        end
     end
 
    
     def setAttacking(piece)
         piece.attacking = []
-        to_attack = []
-     
+        to_attack = [] 
         if piece.type == 'pawn'
             to_attack = getPawnAttacking(piece.location, piece.color)
         elsif piece.type == 'knight'
@@ -612,7 +609,6 @@ class Board
         array.each do |coord|
             temp_attack = recursiveCheck(loc, coord, color)
             if temp_attack != nil && temp_attack != loc
-                puts "#{piece.type} #{piece.color} TEMP ATTACK: #{temp_attack}"
                 temp_piece = @board_array[temp_attack[0]][temp_attack[1]]
                 if temp_piece != 0
                     if temp_piece.color != color
@@ -630,27 +626,20 @@ class Board
         current = loc
         temp =[(current[0]+bump[0]),(current[1]+bump[1])]
         temp2 = [(temp[0]+bump[0]),(temp[1]+bump[1])]
-       # puts "recur temp: #{temp}"
-        #puts "recur temp2: #{temp2}"
-
         if is_valid_move?(temp)
             temp_piece = @board_array[temp[0]][temp[1]]
             if temp_piece == 0 
                 if is_valid_move?(temp2)
                     recursiveCheck(temp, bump, color)
                 else
-                  #  puts "return temp: #{temp}"
                     return temp
                 end
             elsif temp_piece.color != color
-               # puts "second return temp: #{temp}"
                 return temp
             else 
-               # puts "return current #{current}"
                 return current
             end
         else
-           # puts "last return current #{current}"
             return current
         end
     end
