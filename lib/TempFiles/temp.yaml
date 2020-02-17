@@ -1,0 +1,987 @@
+---
+:player: black
+:board: !ruby/object:Board
+  br1: !ruby/object:Piece
+    type: rook
+    init: r
+    uni: "♜"
+    color: black
+    moves: &1
+    - - 0
+      - 1
+    - - 0
+      - 2
+    - - 0
+      - 3
+    - - 0
+      - 4
+    - - 0
+      - 5
+    - - 0
+      - 6
+    - - 0
+      - 7
+    - - 0
+      - -1
+    - - 0
+      - -2
+    - - 0
+      - -3
+    - - 0
+      - -4
+    - - 0
+      - -5
+    - - 0
+      - -6
+    - - 0
+      - -7
+    - - 1
+      - 0
+    - - 2
+      - 0
+    - - 3
+      - 0
+    - - 4
+      - 0
+    - - 5
+      - 0
+    - - 6
+      - 0
+    - - 7
+      - 0
+    - - -1
+      - 0
+    - - -2
+      - 0
+    - - -3
+      - 0
+    - - -4
+      - 0
+    - - -5
+      - 0
+    - - -6
+      - 0
+    - - -7
+      - 0
+    location:
+    - 7
+    - 3
+    move_counter: 4
+    attacking:
+    - - - 2
+        - 3
+      - - 7
+        - 2
+      - - 7
+        - 4
+    last_turn: 13
+  br2: &14 !ruby/object:Piece
+    type: rook
+    init: r
+    uni: "♜"
+    color: black
+    moves: *1
+    location:
+    - 0
+    - 7
+    move_counter: 0
+    attacking:
+    - []
+    last_turn: 0
+  bk1: &8 !ruby/object:Piece
+    type: knight
+    init: k
+    uni: "♞"
+    color: black
+    moves: &2
+    - - -1
+      - 2
+    - - 1
+      - 2
+    - - 2
+      - 1
+    - - 2
+      - -1
+    - - 1
+      - -2
+    - - -1
+      - -2
+    - - -2
+      - -1
+    - - -2
+      - 1
+    location:
+    - 0
+    - 1
+    move_counter: 0
+    attacking:
+    - - &35
+        - 2
+        - 2
+      - &36
+        - 2
+        - 0
+    last_turn: 0
+  bk2: &13 !ruby/object:Piece
+    type: knight
+    init: k
+    uni: "♞"
+    color: black
+    moves: *2
+    location:
+    - 0
+    - 6
+    move_counter: 0
+    attacking:
+    - - &45
+        - 2
+        - 7
+      - &46
+        - 2
+        - 5
+      - &47
+        - 1
+        - 4
+    last_turn: 0
+  bb1: &9 !ruby/object:Piece
+    type: bishop
+    init: b
+    uni: "♝"
+    color: black
+    moves: &3
+    - - 1
+      - 1
+    - - 2
+      - 2
+    - - 3
+      - 3
+    - - 4
+      - 4
+    - - 5
+      - 5
+    - - 6
+      - 6
+    - - 7
+      - 7
+    - - -1
+      - 1
+    - - -2
+      - 2
+    - - -3
+      - 3
+    - - -4
+      - 4
+    - - -5
+      - 5
+    - - -6
+      - 6
+    - - -7
+      - 7
+    - - 1
+      - -1
+    - - 2
+      - -2
+    - - 3
+      - -3
+    - - 4
+      - -4
+    - - 5
+      - -5
+    - - 6
+      - -6
+    - - 7
+      - -7
+    - - -1
+      - -1
+    - - -2
+      - -2
+    - - -3
+      - -3
+    - - -4
+      - -4
+    - - -5
+      - -5
+    - - -6
+      - -6
+    - - -7
+      - -7
+    location:
+    - 0
+    - 2
+    move_counter: 0
+    attacking:
+    - []
+    last_turn: 0
+  bb2: !ruby/object:Piece
+    type: bishop
+    init: b
+    uni: "♝"
+    color: black
+    moves: *3
+    location:
+    - 1
+    - 4
+    move_counter: 1
+    attacking:
+    - - - 0
+        - 5
+      - - 2
+        - 5
+      - - 5
+        - 0
+    last_turn: 15
+  bp1: &20 !ruby/object:Piece
+    type: pawn
+    init: p
+    uni: "♟"
+    color: black
+    moves: &4
+    - - 1
+      - 0
+    - - 2
+      - 0
+    location:
+    - 3
+    - 0
+    move_counter: 1
+    attacking:
+    - - &57
+        - 4
+        - 1
+    last_turn: 1
+  bp2: &15 !ruby/object:Piece
+    type: pawn
+    init: p
+    uni: "♟"
+    color: black
+    moves: *4
+    location:
+    - 1
+    - 1
+    move_counter: 0
+    attacking:
+    - - &48
+        - 2
+        - 2
+      - &49
+        - 2
+        - 0
+    last_turn: 0
+  bp3: &16 !ruby/object:Piece
+    type: pawn
+    init: p
+    uni: "♟"
+    color: black
+    moves: *4
+    location:
+    - 1
+    - 2
+    move_counter: 0
+    attacking:
+    - - &50
+        - 2
+        - 3
+      - &51
+        - 2
+        - 1
+    last_turn: 0
+  bp4: &17 !ruby/object:Piece
+    type: pawn
+    init: p
+    uni: "♟"
+    color: black
+    moves: *4
+    location:
+    - 1
+    - 3
+    move_counter: 0
+    attacking:
+    - - &52
+        - 2
+        - 4
+      - &53
+        - 2
+        - 2
+    last_turn: 0
+  bp5: !ruby/object:Piece
+    type: pawn
+    init: p
+    uni: "♟"
+    color: black
+    moves: *4
+    location:
+    - 3
+    - 4
+    move_counter: 1
+    attacking:
+    - - - 4
+        - 5
+    last_turn: 3
+  bp6: &18 !ruby/object:Piece
+    type: pawn
+    init: p
+    uni: "♟"
+    color: black
+    moves: *4
+    location:
+    - 1
+    - 5
+    move_counter: 0
+    attacking:
+    - - &54
+        - 2
+        - 6
+      - &55
+        - 2
+        - 4
+    last_turn: 0
+  bp7: &21 !ruby/object:Piece
+    type: pawn
+    init: p
+    uni: "♟"
+    color: black
+    moves: *4
+    location:
+    - 3
+    - 6
+    move_counter: 1
+    attacking:
+    - - &58
+        - 4
+        - 7
+      - &59
+        - 4
+        - 5
+    last_turn: 5
+  bp8: &19 !ruby/object:Piece
+    type: pawn
+    init: p
+    uni: "♟"
+    color: black
+    moves: *4
+    location:
+    - 1
+    - 7
+    move_counter: 0
+    attacking:
+    - - &56
+        - 2
+        - 6
+    last_turn: 0
+  bQq: &10 !ruby/object:Piece
+    type: queen
+    init: q
+    uni: "♛"
+    color: black
+    moves: &6
+    - - 0
+      - 1
+    - - 0
+      - 2
+    - - 0
+      - 3
+    - - 0
+      - 4
+    - - 0
+      - 5
+    - - 0
+      - 6
+    - - 0
+      - 7
+    - - 0
+      - -1
+    - - 0
+      - -2
+    - - 0
+      - -3
+    - - 0
+      - -4
+    - - 0
+      - -5
+    - - 0
+      - -6
+    - - 0
+      - -7
+    - - 1
+      - 0
+    - - 2
+      - 0
+    - - 3
+      - 0
+    - - 4
+      - 0
+    - - 5
+      - 0
+    - - 6
+      - 0
+    - - 7
+      - 0
+    - - -1
+      - 0
+    - - -2
+      - 0
+    - - -3
+      - 0
+    - - -4
+      - 0
+    - - -5
+      - 0
+    - - -6
+      - 0
+    - - -7
+      - 0
+    - - 1
+      - 1
+    - - 2
+      - 2
+    - - 3
+      - 3
+    - - 4
+      - 4
+    - - 5
+      - 5
+    - - 6
+      - 6
+    - - 7
+      - 7
+    - - -1
+      - 1
+    - - -2
+      - 2
+    - - -3
+      - 3
+    - - -4
+      - 4
+    - - -5
+      - 5
+    - - -6
+      - 6
+    - - -7
+      - 7
+    - - 1
+      - -1
+    - - 2
+      - -2
+    - - 3
+      - -3
+    - - 4
+      - -4
+    - - 5
+      - -5
+    - - 6
+      - -6
+    - - 7
+      - -7
+    - - -1
+      - -1
+    - - -2
+      - -2
+    - - -3
+      - -3
+    - - -4
+      - -4
+    - - -5
+      - -5
+    - - -6
+      - -6
+    - - -7
+      - -7
+    location:
+    - 0
+    - 3
+    move_counter: 0
+    attacking:
+    - - &37
+        - 2
+        - 5
+      - &38
+        - 0
+        - 4
+    last_turn: 0
+  bKk: &12 !ruby/object:Piece
+    type: king
+    init: k
+    uni: "♚"
+    color: black
+    moves: &7
+    - - 1
+      - 0
+    - - 1
+      - 1
+    - - 0
+      - 1
+    - - 1
+      - -1
+    - - 0
+      - -1
+    - - -1
+      - -1
+    - - -1
+      - 0
+    - - -1
+      - 1
+    location:
+    - 0
+    - 5
+    move_counter: 1
+    attacking:
+    - - &42
+        - 1
+        - 6
+      - &43
+        - 1
+        - 4
+      - &44
+        - 0
+        - 4
+    last_turn: 17
+  wr1: &11 !ruby/object:Piece
+    type: rook
+    init: r
+    uni: "♜"
+    color: white
+    moves: *1
+    location:
+    - 0
+    - 4
+    move_counter: 6
+    attacking:
+    - - &39
+        - 5
+        - 4
+      - &40
+        - 0
+        - 3
+      - &41
+        - 0
+        - 5
+    last_turn: 18
+  wr2: &34 !ruby/object:Piece
+    type: rook
+    init: r
+    uni: "♜"
+    color: white
+    moves: *1
+    location:
+    - 7
+    - 7
+    move_counter: 0
+    attacking:
+    - []
+    last_turn: 0
+  wk1: &29 !ruby/object:Piece
+    type: knight
+    init: k
+    uni: "♞"
+    color: white
+    moves: *2
+    location:
+    - 7
+    - 1
+    move_counter: 0
+    attacking:
+    - - &72
+        - 6
+        - 3
+      - &73
+        - 5
+        - 0
+      - &74
+        - 5
+        - 2
+    last_turn: 0
+  wk2: &33 !ruby/object:Piece
+    type: knight
+    init: k
+    uni: "♞"
+    color: white
+    moves: *2
+    location:
+    - 7
+    - 6
+    move_counter: 0
+    attacking:
+    - - &79
+        - 5
+        - 5
+      - &80
+        - 5
+        - 7
+    last_turn: 0
+  wb1: &30 !ruby/object:Piece
+    type: bishop
+    init: b
+    uni: "♝"
+    color: white
+    moves: *3
+    location:
+    - 7
+    - 2
+    move_counter: 0
+    attacking:
+    - - &75
+        - 3
+        - 6
+    last_turn: 0
+  wb2: &32 !ruby/object:Piece
+    type: bishop
+    init: b
+    uni: "♝"
+    color: white
+    moves: *3
+    location:
+    - 7
+    - 5
+    move_counter: 0
+    attacking:
+    - - &78
+        - 5
+        - 7
+    last_turn: 0
+  wp1: &22 !ruby/object:Piece
+    type: pawn
+    init: p
+    uni: "♟"
+    color: white
+    moves: &5
+    - - -1
+      - 0
+    - - -2
+      - 0
+    location:
+    - 4
+    - 0
+    move_counter: 1
+    attacking:
+    - - &60
+        - 3
+        - 1
+    last_turn: 0
+  wp2: &24 !ruby/object:Piece
+    type: pawn
+    init: p
+    uni: "♟"
+    color: white
+    moves: *5
+    location:
+    - 6
+    - 1
+    move_counter: 0
+    attacking:
+    - - &63
+        - 5
+        - 2
+      - &64
+        - 5
+        - 0
+    last_turn: 0
+  wp3: &25 !ruby/object:Piece
+    type: pawn
+    init: p
+    uni: "♟"
+    color: white
+    moves: *5
+    location:
+    - 6
+    - 2
+    move_counter: 0
+    attacking:
+    - - &65
+        - 5
+        - 3
+      - &66
+        - 5
+        - 1
+    last_turn: 0
+  wp4: !ruby/object:Piece
+    type: pawn
+    init: p
+    uni: "♟"
+    color: white
+    moves: *5
+    location:
+    - 4
+    - 3
+    move_counter: 1
+    attacking:
+    - - - 3
+        - 4
+      - - 3
+        - 2
+    last_turn: 2
+  wp5: &26 !ruby/object:Piece
+    type: pawn
+    init: p
+    uni: "♟"
+    color: white
+    moves: *5
+    location:
+    - 6
+    - 4
+    move_counter: 0
+    attacking:
+    - - &67
+        - 5
+        - 5
+      - &68
+        - 5
+        - 3
+    last_turn: 0
+  wp6: &27 !ruby/object:Piece
+    type: pawn
+    init: p
+    uni: "♟"
+    color: white
+    moves: *5
+    location:
+    - 6
+    - 5
+    move_counter: 0
+    attacking:
+    - - &69
+        - 5
+        - 6
+      - &70
+        - 5
+        - 4
+    last_turn: 0
+  wp7: &23 !ruby/object:Piece
+    type: pawn
+    init: p
+    uni: "♟"
+    color: white
+    moves: *5
+    location:
+    - 4
+    - 6
+    move_counter: 1
+    attacking:
+    - - &61
+        - 3
+        - 7
+      - &62
+        - 3
+        - 5
+    last_turn: 4
+  wp8: &28 !ruby/object:Piece
+    type: pawn
+    init: p
+    uni: "♟"
+    color: white
+    moves: *5
+    location:
+    - 6
+    - 7
+    move_counter: 0
+    attacking:
+    - - &71
+        - 5
+        - 6
+    last_turn: 0
+  wQq: !ruby/object:Piece
+    type: queen
+    init: q
+    uni: "♛"
+    color: white
+    moves: *6
+    location:
+    - 7
+    - 3
+    move_counter: 0
+    attacking:
+    - - - 4
+        - 3
+    last_turn: 0
+  wKk: &31 !ruby/object:Piece
+    type: king
+    init: k
+    uni: "♚"
+    color: white
+    moves: *7
+    location:
+    - 7
+    - 3
+    move_counter: 1
+    attacking:
+    - - &76
+        - 6
+        - 3
+      - &77
+        - 7
+        - 4
+    last_turn: 14
+  board_array:
+  - - 0
+    - *8
+    - *9
+    - *10
+    - *11
+    - *12
+    - *13
+    - *14
+  - - 0
+    - *15
+    - *16
+    - *17
+    - 0
+    - *18
+    - 0
+    - *19
+  - - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - - *20
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - *21
+    - 0
+  - - *22
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - *23
+    - 0
+  - - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - - 0
+    - *24
+    - *25
+    - 0
+    - *26
+    - *27
+    - 0
+    - *28
+  - - 0
+    - *29
+    - *30
+    - *31
+    - 0
+    - *32
+    - *33
+    - *34
+  all_attacking:
+  - *35
+  - *36
+  - *37
+  - *38
+  - *39
+  - *40
+  - *41
+  - *42
+  - *43
+  - *44
+  - *45
+  - *46
+  - *47
+  - *48
+  - *49
+  - *50
+  - *51
+  - *52
+  - *53
+  - *54
+  - *55
+  - *56
+  - *57
+  - *58
+  - *59
+  - *60
+  - *61
+  - *62
+  - *63
+  - *64
+  - *65
+  - *66
+  - *67
+  - *68
+  - *69
+  - *70
+  - *71
+  - *72
+  - *73
+  - *74
+  - *75
+  - *76
+  - *77
+  - *78
+  - *79
+  - *80
+  white_attacking:
+  - *39
+  - *40
+  - *41
+  - *60
+  - *61
+  - *62
+  - *63
+  - *64
+  - *65
+  - *66
+  - *67
+  - *68
+  - *69
+  - *70
+  - *71
+  - *72
+  - *73
+  - *74
+  - *75
+  - *76
+  - *77
+  - *78
+  - *79
+  - *80
+  black_attacking:
+  - *35
+  - *36
+  - *37
+  - *38
+  - *42
+  - *43
+  - *44
+  - *45
+  - *46
+  - *47
+  - *48
+  - *49
+  - *50
+  - *51
+  - *52
+  - *53
+  - *54
+  - *55
+  - *56
+  - *57
+  - *58
+  - *59
+  white_dead:
+  - - "♟"
+  - - "♛"
+  black_dead:
+  - - "♟"
+  - - "♜"
+  - - "♝"
+  promotions: 3
+  turn: 19
+  castle: []
+  white_in_check: false
+  black_in_check: false
+  piece: e7
+  move: e8
+:win: false
