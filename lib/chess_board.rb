@@ -342,8 +342,7 @@ class Board
                 elsif piece.color == 'white'
                     temp_attacking = @black_attacking
                 end
-                puts "temp attacking: #{temp_attacking},"
-                puts "move? #{move}"
+           
                 if temp_attacking.include?(move) 
                     return "check"
                 else
@@ -528,7 +527,7 @@ class Board
                         elsif piece.color == 'white'
                             @white_attacking << attack
                         end
-                        puts "color: #{piece.color}, piece: #{piece.type} attacking: #{piece.attacking}"
+                       # puts "color: #{piece.color}, piece: #{piece.type} attacking: #{piece.attacking}"
                     end
                 end
                 col +=1
@@ -542,8 +541,8 @@ class Board
         @white_attacking.flatten!(1)
 
         #puts "all attacking #{@all_attacking}"
-        puts "black attack #{@black_attacking}"
-        puts "white attack #{@white_attacking}"
+       # puts "black attack #{@black_attacking}"
+        #puts "white attack #{@white_attacking}"
     end
 
    
