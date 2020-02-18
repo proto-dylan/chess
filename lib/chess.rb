@@ -43,7 +43,18 @@ class Game
 
     def play 
         @win = false 
-        until @win do     
+        until @win do 
+            @board.setAllAttacking
+            in_check = @board.checkCheck(@player)
+            if in_check == true
+                puts "IN CHECK"
+                save_game('in_check')
+                if checkMate(@player)
+                    @win = true
+                end
+                load_game('in_check')
+            end
+
             takeTurn(@player) 
             if @player == 'black' && @win != true
                 @player = 'white' 
@@ -53,6 +64,63 @@ class Game
             
         end
     end
+
+    def getCheckTeam(player)
+        team = []
+        col=0
+        row=0
+        8.times do
+            8.times do
+                if @board.board_array[row][col] != 0
+                    piece = @board.board_array[row][col]
+                    if piece.color != player      
+                        team << piece
+                    end              
+                end
+                col +=1 
+            end
+            col = 0
+            row +=1
+        end
+        return team
+    end
+
+    def checkMate(player)                   #Checks all possible moves a player could take to see if check_mate is true
+        team = getCheckTeam(player)
+        check_mate = true                       #true unless a piece can be played
+        team.each do |piece|
+            load_game('in_check')
+       
+            puts "piece in checkMate :#{piece.type}, #{piece.color}"
+
+            if piece.type == 'pawn' || piece.type == 'knight' || piece.type == 'king'
+                moves = piece.moves            #Only do this if piece is pawn or knight or king         
+            else
+                moves = @board.getPossibleMoves(piece)
+            end
+
+            moves.each do |move|
+                if @board.is_valid_move?(move)
+                    puts "move: #{move}"
+                    loc = piece.location
+                    travel = [(loc[0]+move[0]),(loc[1]+move[1])]
+                    puts "in CHECKMATE: piece: #{piece.type}, #{piece.color}, #{loc}"
+                    checkPlacement(piece, move, travel)
+                end
+            end
+
+            @board.setAllAttacking
+            in_check = @board.checkCheck(@player)
+
+            if in_check == false
+                check_mate = false
+            end
+        end
+        load_game('in_check')
+        return check_mate
+    end
+
+
 
     def getInput(player)
         check = false
@@ -150,11 +218,7 @@ class Game
 
     def takeTurn(player, valid=true)  
         @board.setAllAttacking
-        in_check = @board.checkCheck(player)
-        if in_check == true
-            puts "IN CHECK"
-            save_game(in_check)
-        end
+        
         input = getInput(player)
             
         if input == "load"
@@ -193,7 +257,7 @@ class Game
             if still_in_check == true
                 puts "STill in check"
                 @board.displayError(6)
-                load_game(in_check)
+                load_game('in_check')
                 @board.refresh
                 takeTurn(@player)
             end
