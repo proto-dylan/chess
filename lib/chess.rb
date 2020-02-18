@@ -41,9 +41,41 @@ class Game
         end 
     end
 
+    def getCheckTeam(player)
+        team = []
+        col=0
+        row=0
+        8.times do
+            8.times do
+                if @board.board_array[row][col] != 0
+                    piece = @board.board_array[row][col]
+                    if piece.color != player      
+                        team << piece
+                    end              
+                end
+                col +=1 
+            end
+            col = 0
+            row +=1
+        end
+        return team
+    end
+
+
     def play 
         @win = false 
-        until @win do     
+        until @win do 
+            @board.setAllAttacking
+            in_check = @board.checkCheck(@player)
+            if in_check == true
+                puts "IN CHECK"
+                save_game(in_check)
+                if checkMate(@player)
+                   @win = true
+                end
+                load_game('in_check')
+            end
+
             takeTurn(@player) 
             if @player == 'black' && @win != true
                 @player = 'white' 
@@ -52,6 +84,38 @@ class Game
             end
             
         end
+    end
+
+    def checkMate(player)                   #Checks all possible moves a player could take to see if check_mate is true
+        team = getCheckTeam(player)
+        check_mate = true                       #true unless a piece can be played
+        team.each do |piece|
+            load_game('in_check')
+       
+            puts "piece in checkMate :#{piece.type}, #{piece.color}"
+
+            if piece.type == 'pawn' || piece.type == 'knight' || piece.type == 'king'
+                moves = piece.moves            #Only do this if piece is pawn or knight or king
+                moves.each do |move|
+                    if @board.is_valid_move?(move)
+                        puts "move: #{move}"
+                        loc = piece.location
+                        travel = [(loc[0]+move[0]),(loc[1]+move[1])]
+                        puts "in CHECKMATE: piece: #{piece.type}, #{piece.color}, #{loc}"
+                        checkPlacement(piece, move, travel)
+                    end
+                end
+            else
+                
+            end
+            @board.setAllAttacking
+            in_check = @board.checkCheck(@player)
+            if in_check == false
+                check_mate = false
+            end
+        end
+        load_game('in_check')
+        return check_mate
     end
 
     def getInput(player)
@@ -87,15 +151,81 @@ class Game
         return piece, move, piece_coords, move_coords
     end
 
-    def takeTurn(player, valid=true)  
-        @board.setAllAttacking
-        in_check = @board.checkCheck(player)
-        if in_check == true
-            puts "IN CHECK"
-            save_game(in_check)
+    def checkPlacement(piece, move, travel)
+        error = 0
+        piece_coords = piece.location
+        if  piece.type == 'knight'
+            check_move = 'knight'
+        else
+            check_move = @board.checkMove(travel, piece, move)            #checks if move is within moves allowed
+        end 
+
+        case check_move
+        when "check"
+           # @board.displayError(4)
+            error = 4
+            take_turn = true
+        when "castle"
+            @board.placeCastle(@piece, @move)
+        when "attack"
+            @board.pawnAttack(@piece, @move)
+        when "promotion"
+            promo = @board.promotion(@piece, @move)
+            @piece = promo
+            @board.placePiece(@piece, @move)    
+        when "attack promotion"
+            @piece = @board.promotion(@piece, @move)
+            @board.pawnAttack(@piece, @move)
+        when "passant"
+            @board.passant(travel, @piece)
+        when "knight"
+            check_knight = @board.knightCheck(@piece, @move, travel)
+            case check_knight 
+            when 1
+                attack = 1
+                @board.placePiece(@piece, @move, attack)
+                @piece.move_counter += 1 
+            when 0
+                @board.placePiece(@piece, @move)
+                @piece.move_counter += 1
+            when -1
+               # @board.displayError(1)
+                error = 1
+                take_turn = true
+            when -2
+                #@board.displayError(2)
+                error = 2
+                take_turn = true
+            end    
+        when "valid"
+            to_move = true
+            path = @board.buildPath(piece_coords, @move, travel)
+            type = @piece.type
+            color = @piece.color
+            to_move = @board.checkPath(path, piece_coords, color) 
+            case to_move
+                when 0               #place          
+                    @board.placePiece(@piece, @move)
+                    @piece.move_counter += 1 
+                when -1              #error
+                    #@board.displayError(1)
+                    error = 1
+                    take_turn = true
+                when 1      
+                    attack = 1
+                    @board.placePiece(@piece, @move, attack)
+                    @piece.move_counter += 1            
+            end
+        when "invalid"
+            #@board.displayError(1)
+            error = 1
+            take_turn = true
         end
-        input = getInput(player)
-            
+        return take_turn, error
+    end
+
+    def takeTurn(player)   
+        input = getInput(player)  
         if input == "load"
             load_game  
             player = @player
@@ -114,70 +244,14 @@ class Game
             piece_coords = input[2]
             move_coords = input[3]
             travel = @board.getTravel(@move, @piece)
-
-            if @piece.type == 'knight'
-                check_move = "knight"
-            else
-                check_move = @board.checkMove(travel, @piece, @move)            #checks if move is within moves allowed
-            end 
-
-            case check_move
-                when "check"
-                    @board.displayError(4)
-                    takeTurn(@player)
-                when "castle"
-                    @board.placeCastle(@piece, @move)
-                when "attack"
-                    @board.pawnAttack(@piece, @move)
-                when "promotion"
-                    promo = @board.promotion(@piece, @move)
-                    @piece = promo
-                    @board.placePiece(@piece, @move)    
-                when "attack promotion"
-                    @piece = @board.promotion(@piece, @move)
-                    @board.pawnAttack(@piece, @move)
-                when "passant"
-                    @board.passant(travel, @piece)
-                when "knight"
-                    check_knight = @board.knightCheck(@piece, @move, travel)
-                    case check_knight 
-                        when 1
-                            attack = 1
-                            @board.placePiece(@piece, @move, attack)
-                            @piece.move_counter += 1 
-                        when 0
-                            @board.placePiece(@piece, @move)
-                            @piece.move_counter += 1
-                        when -1
-                            @board.displayError(1)
-                            takeTurn(@player)
-                        when -2
-                            @board.displayError(2)
-                            takeTurn(@player)
-                    end    
-                when "valid"
-                    to_move = true
-                    path = @board.buildPath(piece_coords, @move, travel)
-                    type = @piece.type
-                    color = @piece.color
-                    to_move = @board.checkPath(path, piece_coords, color) 
-                    case to_move
-                        when 0               #place          
-                            @board.placePiece(@piece, @move)
-                            @piece.move_counter += 1 
-                        when -1              #error
-                            @board.displayError(1)
-                            takeTurn(@player)
-                        when 1      
-                            attack = 1
-                            @board.placePiece(@piece, @move, attack)
-                            @piece.move_counter += 1            
-                    end
-                when "invalid"
-                    @board.displayError(1)
-                    takeTurn(@player)
+            check_placement = checkPlacement(@piece, @move, travel)
+            take_turn = check_placement[0]
+            if check_placement[1]
+                @board.displayError(check_placement[1])
             end
-           
+            if take_turn                  #checkPlacement returns true for takeTurn 
+                takeTurn(player)
+            end
             
             @board.setAllAttacking
 
@@ -185,7 +259,7 @@ class Game
             if still_in_check == true
                 puts "STill in check"
                 @board.displayError(6)
-                load_game(in_check)
+                load_game('in_check')
                 @board.refresh
                 takeTurn(@player)
             end

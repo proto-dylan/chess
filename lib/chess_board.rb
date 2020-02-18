@@ -619,6 +619,7 @@ class Board
         loc = piece.location
         color = piece.color
         attack = [] 
+        possible_moves = []
         array.each do |coord|
             temp_attack = recursiveCheck(loc, coord, color)
             if temp_attack != nil && temp_attack != loc
