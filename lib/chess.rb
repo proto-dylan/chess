@@ -85,27 +85,72 @@ class Game
         return team
     end
 
-    def checkMate(player)                   #Checks all possible moves a player could take to see if check_mate is true
-        team = getCheckTeam(player)
-        check_mate = true                       #true unless a piece can be played
+    def checkMate(player) #Checks all possible moves a player could take to see if check_mate is true
+        if player == 'black'
+            color = 'white'
+        else
+            color = 'black'
+        end
+        team = getCheckTeam(color)
+        check_mate = true 
+        moves = []                      #true unless a piece can be played
         team.each do |piece|
-            load_game('in_check')
-       
+            #load_game('in_check')
+            moves = []
             puts "piece in checkMate :#{piece.type}, #{piece.color}"
-
             if piece.type == 'pawn' || piece.type == 'knight' || piece.type == 'king'
-                moves = piece.moves            #Only do this if piece is pawn or knight or king         
+                if piece.type == 'pawn' 
+                    temp = piece.attacking 
+                    temp.each do |move|
+                        moves << move
+                    end
+                    temp = piece.moves
+                    temp.each do |move|
+                        moves << move
+                    end
+                    
+                    puts "pawn moves #{temp}|"
+                elsif piece.type == 'knight' 
+                    temp = piece.moves
+                    puts "knight_moves: #{temp}"
+                    
+                elsif piece.type == 'king'
+                    temp = piece.moves
+                end
+                moves.each do |move|
+                    if @board.depth(move) > 1
+                        move.flatten!(1)
+                    end
+                end
+                puts "temp before #{temp}"
+                temp.each do |move|
+                    puts "moveeeee #{move},  loc#{piece.location}"
+                    travel = [(move[0]+piece.location[0]),(move[1]+piece.location[1])]
+                    if @board.is_valid_move?(travel)
+                        moves << move
+                    end
+                end
             else
                 moves = @board.getPossibleMoves(piece)
             end
-
-            moves.each do |move|
-                if @board.is_valid_move?(move)
-                    puts "move: #{move}"
-                    loc = piece.location
-                    travel = [(loc[0]+move[0]),(loc[1]+move[1])]
-                    puts "in CHECKMATE: piece: #{piece.type}, #{piece.color}, #{loc}"
-                    checkPlacement(piece, move, travel)
+            puts "mooov #{moves}"
+            if @board.depth(moves) > 2
+                moves.flatten!(1)
+            end
+            puts "mooov2 #{moves}"   
+                puts "Moves to check: #{moves}"
+        
+            
+            puts "CHeckmATE moves #{moves}"
+            if moves != nil
+                moves.each do |move|
+                    if @board.is_valid_move?(move)
+                        puts "move: #{move}"
+                        loc = piece.location
+                        travel = [(loc[0]+move[0]),(loc[1]+move[1])]
+                        puts "in CHECKMATE: piece: #{piece.type}, #{piece.color}, #{loc}, #{travel}"
+                        checkPlacement(piece, move, travel, loc, move, travel)
+                    end
                 end
             end
 
@@ -114,6 +159,7 @@ class Game
 
             if in_check == false
                 check_mate = false
+                return check_mate
             end
         end
         load_game('in_check')
@@ -193,7 +239,8 @@ class Game
                 end    
             when "valid"
                 to_move = true
-                path = @board.buildPath(piece_coords, @move, travel)
+                temp = @board.buildPath(piece_coords, @move, travel)
+                path = temp[0]
                 type = @piece.type
                 color = @piece.color
                 to_move = @board.checkPath(path, piece_coords, color) 

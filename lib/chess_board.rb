@@ -137,6 +137,7 @@ class Board
     end
     
     def buildPath(location, destination, travel)
+        loc = location
         path = []      
         counter_col = 0
         counter_row = 0
@@ -173,12 +174,15 @@ class Board
             end   
         end
         travel_temp.times do
-            location[0] += counter_row
-            location[1] += counter_col
-            temp = [location[0],location[1]]
+            loc[0] += counter_row
+            loc[1] += counter_col
+            temp = [loc[0],loc[1]]
             path << temp    
         end
-        return path
+        #puts "BUILDPATH 2 loc = #{loc}"
+        loc = [(destination[0]-travel[0]),(destination[1]-travel[1])]
+       # puts "BUILDPATH 3 loc = #{loc}, path #{path}"
+        return path, loc
     end
 
     def checkPath(path, piece_coords, color)
@@ -587,6 +591,17 @@ class Board
         end   
         return attack 
     end
+
+    def depth(xs, n=0)
+        return case
+        when xs.class != Array
+          n
+        when xs == []
+          n + 1
+        else
+          xs.collect{|x| depth x, n+1}.max
+        end
+      end
     
     def getPawnAttacking(loc, color) 
         attack = []
@@ -632,6 +647,27 @@ class Board
             end
         end
         return attack
+    end
+
+    def getPossibleMoves(piece)
+        attacks = piece.attacking.flatten(1)
+        loc = piece.location
+        
+        all_moves = []
+       # puts "in get possibleMOves: #{attacks}"
+        attacks.each do |attack|
+            #puts "loc< #{loc}, piece.loc #{piece.location}"
+            puts "attack: #{attack}"
+            travel = [(attack[0]-loc[0]),(attack[1]-loc[1])]
+            #puts  "IN!buildPath loc#{loc}, attack #{attack}, travel #{travel}"
+            path = buildPath(loc, attack, travel)
+            piece.location = path[1]
+            loc = piece.location
+            #puts "path at the end#{path[0]}"
+            all_moves << path[0]
+        end
+        #puts "allmoves #{all_moves}"
+        return all_moves.flatten!(1)
     end
 
     def recursiveCheck(loc, bump, color)
