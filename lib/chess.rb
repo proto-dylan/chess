@@ -138,18 +138,24 @@ class Game
                 moves.flatten!(1)
             end
             puts "mooov2 #{moves}"   
-                puts "Moves to check: #{moves}"
-        
-            
-            puts "CHeckmATE moves #{moves}"
+
             if moves != nil
                 moves.each do |move|
                     if @board.is_valid_move?(move)
                         puts "move: #{move}"
                         loc = piece.location
                         travel = [(loc[0]+move[0]),(loc[1]+move[1])]
-                        puts "in CHECKMATE: piece: #{piece.type}, #{piece.color}, #{loc}, #{travel}"
+                        puts "in CHECKMATE: piece: #{piece.type}, #{piece.color}, loc  #{loc}, travel #{travel}"
                         checkPlacement(piece, move, travel, loc, move, travel)
+                        @board.refresh
+                    end
+                    @board.setAllAttacking
+                    in_check = @board.checkCheck(@player)
+                    puts "_______________________________________________________________________________________"
+                    puts "in check? #{in_check}"
+                    if in_check == false
+                        check_mate = false
+                        return check_mate
                     end
                 end
             end
