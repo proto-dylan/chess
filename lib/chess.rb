@@ -44,11 +44,12 @@ class Game
     def play 
         @win = false 
         until @win do 
+            save_game('in_check')
             @board.setAllAttacking
             in_check = @board.checkCheck(@player)
             if in_check == true
                 puts "IN CHECK"
-                save_game('in_check')
+                
                 if checkMate(@player)
                     @win = true
                 end
@@ -86,6 +87,10 @@ class Game
     end
 
     def checkMate(player) #Checks all possible moves a player could take to see if check_mate is true
+        load_game('in_check')
+        board = @board
+        board.assignLocations
+
         if player == 'black'
             color = 'white'
         else
@@ -95,73 +100,91 @@ class Game
         check_mate = true 
         moves = []                      #true unless a piece can be played
         team.each do |piece|
-            #load_game('in_check')
+
             moves = []
-            puts "piece in checkMate :#{piece.type}, #{piece.color}"
+            #puts "piece in checkMate :#{piece.type}, #{piece.color}"
             if piece.type == 'pawn' || piece.type == 'knight' || piece.type == 'king'
-                if piece.type == 'pawn' 
-                    temp = piece.attacking 
-                    temp.each do |move|
-                        moves << move
-                    end
-                    temp = piece.moves
-                    temp.each do |move|
-                        moves << move
-                    end
-                    
-                    puts "pawn moves #{temp}|"
-                elsif piece.type == 'knight' 
-                    temp = piece.moves
-                    puts "knight_moves: #{temp}"
-                    
-                elsif piece.type == 'king'
-                    temp = piece.moves
-                end
-                moves.each do |move|
-                    if @board.depth(move) > 1
-                        move.flatten!(1)
-                    end
-                end
-                puts "temp before #{temp}"
-                temp.each do |move|
-                    puts "moveeeee #{move},  loc#{piece.location}"
-                    travel = [(move[0]+piece.location[0]),(move[1]+piece.location[1])]
-                    if @board.is_valid_move?(travel)
-                        moves << move
-                    end
-                end
+            #    if piece.type == 'pawn' 
+            #        temp = piece.attacking 
+            #        temp.each do |move|
+            #            moves << move
+            #        end
+            #        temp = piece.moves
+            #        temp.each do |move|
+            #            moves << move
+            #        end
+            #    elsif piece.type == 'knight' 
+            #        temp = piece.moves                   
+            #    elsif piece.type == 'king'
+            #        temp = piece.moves
+            #    end
+            #    moves.each do |move|
+            #        if board.depth(move) > 1
+            #            move.flatten!(1)
+            #        end
+            #    end
+            #    temp.each do |move|
+            #        travel = [(move[0]+piece.location[0]),(move[1]+piece.location[1])]
+            #        if board.is_valid_move?(travel)
+            #            moves << move
+            #        end
+            #    end
             else
-                moves = @board.getPossibleMoves(piece)
+                moves = board.getPossibleMoves(piece)
             end
-            puts "mooov #{moves}"
-            if @board.depth(moves) > 2
+
+            if board.depth(moves) > 2
                 moves.flatten!(1)
-            end
-            puts "mooov2 #{moves}"   
+            end  
+            puts "MOVES : #{moves}"
 
             if moves != nil
                 moves.each do |move|
-                    if @board.is_valid_move?(move)
-                        puts "move: #{move}"
-                        loc = piece.location
-                        travel = [(loc[0]+move[0]),(loc[1]+move[1])]
-                        puts "in CHECKMATE: piece: #{piece.type}, #{piece.color}, loc  #{loc}, travel #{travel}"
-                        checkPlacement(piece, move, travel, loc, move, travel)
-                        @board.refresh
+                    load_game('in_check')
+                    board = @board
+                    board.displayBoard(board.board_array)
+                    board.assignLocations
+                    puts "PIECE: #{piece.type}, loc #{piece.location}"
+                    if board.is_valid_move?(move)
+                        piece_coords = piece.location
+                        travel = [(move[0]-piece_coords[0]),(move[1]-piece_coords[1])]
+                        puts "in CHECKMATE: piece: #{piece.type}, #{piece.color}, loc  #{piece_coords}, travel #{travel} move: #{move}"
+
+                        if piece.type == 'knight'
+                            check_move = "knight"
+                        else
+                            check_move = board.checkMove(travel, piece, move)            #checks if move is within moves allowed
+                        end
+                        
+                        puts "CHECK MOVE: #{check_move}"
+                        check_placement = checkPlacement(check_move, piece, move, piece_coords, travel, board)
+                        #puts "check_placement: #{check_placement}"
+                        if check_placement[0] != true
+                        #    puts "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+                            board.simplePrint
+                        end
+                        #@board.refresh
+                        
+                        board.setAllAttacking
+                        in_check = board.checkCheck(@player)
+                        puts "_______________________________________________________________________________________"
+                        puts "in check? #{in_check}"
+                        if in_check == false
+                            check_mate = false
+                            return check_mate
+                        end
+                        piece.location = piece_coords
+                                          
                     end
-                    @board.setAllAttacking
-                    in_check = @board.checkCheck(@player)
-                    puts "_______________________________________________________________________________________"
-                    puts "in check? #{in_check}"
-                    if in_check == false
-                        check_mate = false
-                        return check_mate
-                    end
+                    load_game('in_check')
+                    board = @board
+                    board.displayBoard(board.board_array)
+                    board.assignLocations  
                 end
             end
 
-            @board.setAllAttacking
-            in_check = @board.checkCheck(@player)
+            board.setAllAttacking
+            in_check = board.checkCheck(@player)
 
             if in_check == false
                 check_mate = false
@@ -207,66 +230,68 @@ class Game
         return piece, move, piece_coords, move_coords
     end
 
-    def checkPlacement(check_move, piece, move, piece_coords, move_coords, travel)
+    def checkPlacement(check_move, piece, move, piece_coords, travel, board = @board)
         take_turn = false
+        error = 0
+        board_array = board.board_array
         case check_move
             when "check"
-                @board.displayError(4)
+                error = 4
                 take_turn = true
             when "castle"
-                @board.placeCastle(@piece, @move)
+                board.placeCastle(piece, move)
             when "attack"
-                @board.pawnAttack(@piece, @move)
+                board.pawnAttack(piece, move)
             when "promotion"
-                promo = @board.promotion(@piece, @move)
-                @piece = promo
-                @board.placePiece(@piece, @move)    
+                promo = board.promotion(piece, move)
+                piece = promo
+                board.placePiece(piece, move, board_array)    
             when "attack promotion"
-                @piece = @board.promotion(@piece, @move)
-                @board.pawnAttack(@piece, @move)
+                piece = board.promotion(piece, move)
+                board.pawnAttack(piece, move)
             when "passant"
-                @board.passant(travel, @piece)
+                board.passant(travel, piece)
             when "knight"
-                check_knight = @board.knightCheck(@piece, @move, travel)
+                check_knight = board.knightCheck(piece, move, travel)
                 case check_knight 
                     when 1
                         attack = 1
-                        @board.placePiece(@piece, @move, attack)
-                        @piece.move_counter += 1 
+                        board.placePiece(piece, move, board_array, attack)
+                        piece.move_counter += 1 
                     when 0
-                        @board.placePiece(@piece, @move)
-                        @piece.move_counter += 1
+                        board.placePiece(piece, move, board_array)
+                        piece.move_counter += 1
                     when -1
-                        @board.displayError(1)
+                        error = 2
                         take_turn = true
                     when -2
-                        @board.displayError(2)
+                        error = 1
                         take_turn = true
                 end    
             when "valid"
                 to_move = true
-                temp = @board.buildPath(piece_coords, @move, travel)
+                temp = board.buildPath(piece_coords, move, travel)
                 path = temp[0]
-                type = @piece.type
-                color = @piece.color
-                to_move = @board.checkPath(path, piece_coords, color) 
+                type = piece.type
+                color = piece.color
+                to_move = board.checkPath(path, piece_coords, color) 
                 case to_move
                     when 0               #place          
-                        @board.placePiece(@piece, @move)
-                        @piece.move_counter += 1 
+                        board.placePiece(piece, move, board_array)
+                        piece.move_counter += 1 
                     when -1              #error
-                        @board.displayError(1)
+                        error = 1
                         take_turn = true
                     when 1      
                         attack = 1
-                        @board.placePiece(@piece, @move, attack)
-                        @piece.move_counter += 1            
+                        board.placePiece(piece, move, board_array, attack)
+                        piece.move_counter += 1            
                 end
             when "invalid"
-                @board.displayError(1)
+                error = 1
                 take_turn = true
         end
-        return take_turn
+        return take_turn, error
     end
 
     def takeTurn(player, valid=true)  
@@ -299,8 +324,12 @@ class Game
                 check_move = @board.checkMove(travel, @piece, @move)            #checks if move is within moves allowed
             end 
 
-            check_placement = checkPlacement(check_move, @piece, @move, piece_coords, move_coords, travel)
-            if check_placement == true
+            check_placement = checkPlacement(check_move, @piece, @move, piece_coords, travel)
+            error = check_placement[1]
+            if error != 0
+                @board.displayError(error)
+            end
+            if check_placement[0] == true
                 takeTurn(@player)
             end
             

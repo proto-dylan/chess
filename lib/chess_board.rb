@@ -23,7 +23,7 @@ class Board
     def initialize 
         makePieces
         setBoard
-        assignStartingLocations
+        assignLocations
         setAllAttacking
         #refresh
         #simplePrint
@@ -120,7 +120,7 @@ class Board
         return @board_array
     end
 
-    def assignStartingLocations
+    def assignLocations
         col=0
         row=0
         8.times do
@@ -400,8 +400,8 @@ class Board
         king = @board_array[king_array[0]][king_array[1]]
         king_move = @castle[0].flatten
         rook_move = @castle[1].flatten
-        placePiece(king, king_move)
-        placePiece(rook, rook_move)
+        placePiece(king, king_move, @board_array)
+        placePiece(rook, rook_move, @board_array)
     end
 
     def pawnAttack(piece, attack)       
@@ -433,14 +433,14 @@ class Board
         return travel
     end
 
-    def placePiece(piece, move, attack=0)
+    def placePiece(piece, move, board_array, attack=0)
         current = piece.location
         piece.location = move        
         row = move[0]
         col = move[1]
         to_attack = @board_array[row][col]
-        @board_array[current[0]][current[1]] = 0
-        @board_array[row][col] = piece
+        board_array[current[0]][current[1]] = 0
+        board_array[row][col] = piece
         if attack == 1
             assignDead(to_attack)     
         end      
@@ -794,7 +794,7 @@ class Board
         puts "\n" 
     end
     
-    def displayBoard
+    def displayBoard(board_array = @board_array)
         puts "\n\n"
         puts "              a b c d e f g h  "
         counter = 8
@@ -809,20 +809,20 @@ class Board
                 toggle = 0
             end
             8.times do |col|                     
-                if @board_array[row][col] != 0
-                    color_now = "#{@board_array[row][col].color}"
+                if board_array[row][col] != 0
+                    color_now = "#{board_array[row][col].color}"
                     if toggle == 1
                         if color_now == "black"
-                            print "#{@board_array[row][col].uni} ".black.on_light_black
+                            print "#{board_array[row][col].uni} ".black.on_light_black
                         else
-                            print "#{@board_array[row][col].uni} ".white.on_light_black
+                            print "#{board_array[row][col].uni} ".white.on_light_black
                         end
                         toggle = 0
                     else
                         if color_now == "black"
-                            print "#{@board_array[row][col].uni} ".black.on_light_blue
+                            print "#{board_array[row][col].uni} ".black.on_light_blue
                         else 
-                            print "#{@board_array[row][col].uni} ".white.on_light_blue
+                            print "#{board_array[row][col].uni} ".white.on_light_blue
                         end
                         toggle = 1
                     end
