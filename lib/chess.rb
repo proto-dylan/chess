@@ -164,17 +164,13 @@ class Game
             end  
 
             if moves != nil
+
                 board_serialized = Marshal.dump(@board)
                 moves.each do |move|
-                  
                     temp_board = Marshal.load(board_serialized)
                     puts "after Board #{temp_board.object_id}"
                     checkMateRound(piece, move, temp_board)
                     temp_board = Marshal.load(board_serialized)
-                   
-                
-
-                    
                 end
                 load_game('in_check')
                 
