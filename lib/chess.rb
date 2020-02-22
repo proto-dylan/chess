@@ -105,7 +105,7 @@ class Game
                 puts "CHECK MOVE: #{check_move}"
                 check_placement = checkPlacement(check_move, piece, move, piece_coords, travel)
             end              
-            in_check = board.checkCheck(@player)
+            in_check = board.checkCheck(player)
             puts "_______________________________________________________________________________________"
             puts "in check? #{in_check}"
             if in_check == false
@@ -163,17 +163,22 @@ class Game
                 moves.flatten!(1)
             end  
 
-            puts "Piece: #{piece.type} MOVES : #{moves}"
-
             if moves != nil
-                puts "begin move iteration: piece: #{piece.type}, #{piece.color}, loc  #{piece.location}"
+                board_serialized = Marshal.dump(@board)
                 moves.each do |move|
-                    board = @board
-                    checkMateRound(piece, move, board)
-                    load_game('in_check')
-                    @board.assignLocations
+                  
+                    temp_board = Marshal.load(board_serialized)
+                    puts "after Board #{temp_board.object_id}"
+                    checkMateRound(piece, move, temp_board)
+                    temp_board = Marshal.load(board_serialized)
+                   
+                
+
                     
                 end
+                load_game('in_check')
+                
+                puts "after Load #{@board.object_id}"
                 puts "end move iteration: piece: #{piece.type}, #{piece.color}, loc  #{piece.location}"
 
             end
