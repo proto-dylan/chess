@@ -86,11 +86,37 @@ class Game
         return team
     end
 
-    def checkMate(player) #Checks all possible moves a player could take to see if check_mate is true
-        load_game('in_check')
-        board = @board
-        board.assignLocations
+    def checkMateRound(piece, move, board)
+            check_mate = true
+            loc = piece.location
+           # puts "PIECE: #{piece.type}, loc #{loc} piece.loc #{piece.location}, move#{move}"
+            if board.is_valid_move?(move)
+                piece_coords = loc
+                travel = [(move[0]-piece_coords[0]),(move[1]-piece_coords[1])]
 
+                puts "in CHECKMATEround: piece: #{piece.type}, #{piece.color}, loc  #{piece_coords}, travel #{travel} move: #{move}"
+
+                if piece.type == 'knight'
+                    check_move = "knight"
+                else
+                    check_move = board.checkMove(travel, piece, move)            #checks if move is within moves allowed
+                end
+                
+                puts "CHECK MOVE: #{check_move}"
+                check_placement = checkPlacement(check_move, piece, move, piece_coords, travel)
+            end              
+            in_check = board.checkCheck(@player)
+            puts "_______________________________________________________________________________________"
+            puts "in check? #{in_check}"
+            if in_check == false
+                check_mate = false
+                return check_mate
+            end
+    
+        return check_mate
+    end
+
+    def checkMate(player) #Checks all possible moves a player could take to see if check_mate is true
         if player == 'black'
             color = 'white'
         else
@@ -100,7 +126,7 @@ class Game
         check_mate = true 
         moves = []                      #true unless a piece can be played
         team.each do |piece|
-
+            loc = piece.location
             moves = []
             #puts "piece in checkMate :#{piece.type}, #{piece.color}"
             if piece.type == 'pawn' || piece.type == 'knight' || piece.type == 'king'
@@ -130,72 +156,39 @@ class Game
             #        end
             #    end
             else
-                moves = board.getPossibleMoves(piece)
+                moves = @board.getPossibleMoves(piece)
             end
 
-            if board.depth(moves) > 2
+            if @board.depth(moves) > 2
                 moves.flatten!(1)
             end  
-            puts "MOVES : #{moves}"
+
+            puts "Piece: #{piece.type} MOVES : #{moves}"
 
             if moves != nil
+                puts "begin move iteration: piece: #{piece.type}, #{piece.color}, loc  #{piece.location}"
                 moves.each do |move|
-                    load_game('in_check')
                     board = @board
-                    board.displayBoard(board.board_array)
-                    board.assignLocations
-                    puts "PIECE: #{piece.type}, loc #{piece.location}"
-                    if board.is_valid_move?(move)
-                        piece_coords = piece.location
-                        travel = [(move[0]-piece_coords[0]),(move[1]-piece_coords[1])]
-                        puts "in CHECKMATE: piece: #{piece.type}, #{piece.color}, loc  #{piece_coords}, travel #{travel} move: #{move}"
-
-                        if piece.type == 'knight'
-                            check_move = "knight"
-                        else
-                            check_move = board.checkMove(travel, piece, move)            #checks if move is within moves allowed
-                        end
-                        
-                        puts "CHECK MOVE: #{check_move}"
-                        check_placement = checkPlacement(check_move, piece, move, piece_coords, travel, board)
-                        #puts "check_placement: #{check_placement}"
-                        if check_placement[0] != true
-                        #    puts "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-                            board.simplePrint
-                        end
-                        #@board.refresh
-                        
-                        board.setAllAttacking
-                        in_check = board.checkCheck(@player)
-                        puts "_______________________________________________________________________________________"
-                        puts "in check? #{in_check}"
-                        if in_check == false
-                            check_mate = false
-                            return check_mate
-                        end
-                        piece.location = piece_coords
-                                          
-                    end
+                    checkMateRound(piece, move, board)
                     load_game('in_check')
-                    board = @board
-                    board.displayBoard(board.board_array)
-                    board.assignLocations  
+                    @board.assignLocations
+                    
                 end
-            end
+                puts "end move iteration: piece: #{piece.type}, #{piece.color}, loc  #{piece.location}"
 
-            board.setAllAttacking
-            in_check = board.checkCheck(@player)
-
-            if in_check == false
-                check_mate = false
-                return check_mate
             end
+            puts "after cehckMateRound, #{piece.type} #{piece.color}, loc #{piece.location}"
+           # @board.setAllAttacking
+           # in_check = @board.checkCheck(@player)
+
+            #if in_check == false
+            #    check_mate = false
+            #    return check_mate
+            #end
         end
-        load_game('in_check')
+        
         return check_mate
     end
-
-
 
     def getInput(player)
         check = false
