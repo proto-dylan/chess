@@ -52,7 +52,9 @@ class Game
                 
                 if checkMate(@player)
                     @win = true
+                    winner(@player)
                 end
+
                 load_game('in_check')
             end
 
@@ -89,7 +91,7 @@ class Game
     def checkMateRound(piece, move, board)
             check_mate = true
             loc = piece.location
-           # puts "PIECE: #{piece.type}, loc #{loc} piece.loc #{piece.location}, move#{move}"
+           
             if board.is_valid_move?(move)
                 piece_coords = loc
                 travel = [(move[0]-piece_coords[0]),(move[1]-piece_coords[1])]
@@ -97,7 +99,7 @@ class Game
                 puts "in CHECKMATEround: piece: #{piece.type}, #{piece.color}, loc  #{piece_coords}, travel #{travel} move: #{move}"
 
                 if piece.type == 'knight'
-                    check_move = "knight"
+                    check_move = 'knight'
                 else
                     check_move = board.checkMove(travel, piece, move)            #checks if move is within moves allowed
                 end
@@ -165,16 +167,26 @@ class Game
 
             if moves != nil
 
-                board_serialized = Marshal.dump(@board)
-                moves.each do |move|
-                    temp_board = Marshal.load(board_serialized)
-                    puts "after Board #{temp_board.object_id}"
-                    checkMateRound(piece, move, temp_board)
-                    temp_board = Marshal.load(board_serialized)
-                end
-                load_game('in_check')
+                temp_board = Marshal.load(Marshal.dump @board)
+                #puts "@board: #{@board}"
+                #puts "temp_board: #{temp_board}"
+                loc = piece.location
+                puts "loc: #{loc}"
+                #puts "temp_board array? #{temp_board.board_array}"
                 
-                puts "after Load #{@board.object_id}"
+                temp_piece = temp_board.board_array[loc[0]][loc[1]]
+                #puts "temp_piece :#{temp_piece}"
+                moves.each do |move|
+                    
+    
+                    check_mate = checkMateRound(temp_piece, move, temp_board)
+                   
+                end
+
+               
+                #load_game('in_check')
+                
+                #puts "after Load #{@board.object_id}"
                 puts "end move iteration: piece: #{piece.type}, #{piece.color}, loc  #{piece.location}"
 
             end
@@ -289,8 +301,7 @@ class Game
     end
 
     def takeTurn(player, valid=true)  
-        @board.setAllAttacking
-        
+        @board.setAllAttacking    
         input = getInput(player)
             
         if input == "load"
@@ -340,10 +351,48 @@ class Game
 
             @piece.last_turn = @board.turn
             @board.turn += 1
-            #@board.checkCheck(player)
+            @board.checkCheck(player)
             @board.refresh
         end
         
+    end
+
+    def winner(player)
+        
+        puts "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+        puts "                  [/][/][/][/][/][/][/][/][/][/][/][/]"
+        sleep(0.08)
+        puts "                  |/|           We have            |/|"
+        sleep(0.08)
+        puts "                  |/|              a               |/|"
+        sleep(0.08)
+        puts "                  |/|           WINNER             |/|"
+        sleep(0.08)
+        puts "                  |/|                              |/|"
+        sleep(0.08)
+        puts "                  |/|       #{player} player           |/|"
+        sleep(0.08)
+        puts "                  |/|       takes the game         |/|"
+        sleep(0.08)
+        puts "                  |/|                              |/|"
+        sleep(0.08)
+        puts "                  |/|      New game?  (Y, N)       |/|"
+        sleep(0.08)
+        puts "                  |/|                              |/|"
+        sleep(0.08)
+        puts "                  [/][/][/][/][/][/][/][/][/][/][/][/]"
+        sleep(0.08)
+        answer = gets.chomp
+        if answer.downcase == 'y'
+            @board.displayMessage(3)
+            game = Game.new
+        else
+            exit
+        end
+        5.times do
+            puts "\n"
+            sleep(0.08)
+        end
     end
     
     def welcome

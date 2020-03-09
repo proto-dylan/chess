@@ -601,7 +601,7 @@ class Board
         else
           xs.collect{|x| depth x, n+1}.max
         end
-      end
+    end
     
     def getPawnAttacking(loc, color) 
         attack = []
@@ -719,6 +719,8 @@ class Board
         displayDead   
         displayBoard        
     end 
+
+  
 
     def displayError(switch)
         puts "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
